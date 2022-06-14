@@ -1,0 +1,31 @@
+manimCp
+14-day video timeline:
+
+days 1-3:  (6 hrs)
+	scripting
+	storyboarding
+	get feedback
+
+days 5-8:  (10 hrs)
+	program scenes
+	get feedback
+
+days 9-12:  (8 hrs)
+	record voice-over
+	edit / stitch scenes together, ost, etc
+
+days 13-14:  (4 hrs)
+	get feedback
+	final tweaks
+	upload
+	promote on codeforces/codechef/leetcode/reddit
+
+Need OST - 
+	- “communication”
+		- https://www.apmmusic.com/albums/KAR-1033
+	- “determination”,  “determination light”,  “human approach light”
+		- https://www.apmmusic.com/albums/KOS-0482/KOS_KOS_0482_00201
+	- “beneath the canopy”
+		- https://www.apmmusic.com/albums/2FM_2FM_0070
+	- “cassiopeia”
+		- https://www.apmmusic.com/albums/KPM_KPM_2233

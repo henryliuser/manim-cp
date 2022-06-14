@@ -1,0 +1,46 @@
+todo: come up with good titles
+
+" Teleporting Ants & Invariants "
+Telepanting
+https://codeforces.com/contest/1552/problem/F
+
+usaco cow rectangle subsets thing
+
+Repetitions Decoding
+https://codeforces.com/contest/1641/problem/B
+
+" Traffic Accidents & Graph Theory "
+Cars
+https://codeforces.com/contest/1635/problem/E
+
+Tomasulo's Algorithm, Out-of-Order Execution
+" What if CPUs could run even faster!? "
+
+Infinite Set
+" bitwise fibonacci and counting "
+
+Defender of Childhood Dreams
+https://codeforces.com/problemset/problem/1583/F
+
+some ioi/icpc thing
+" the hardest problem on the other hardest test "
+
+" There Can Be At Most One... "
+2-product AMO sat encoding by jingchao chen, 
+coprime solitaire ABC 210-F
+
+" Safe Cracking with 2-SAT "
+codechef HKRMAN
+
+abc250-F one-fourth
+
+deltix round balancing queries / parenthesis queries 
+
+range sort query
+
+zebraness + builder takahashi
+
+
+
+
+
