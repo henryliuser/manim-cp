@@ -8,3 +8,4 @@ def psumAnim(A):
 
     class Main(Scene):
         def construct(self):
+            pass
