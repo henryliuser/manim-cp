@@ -1,0 +1,1 @@
+LIGHT_ORANGE: str = "#ECAC6F"

@@ -1,6 +1,6 @@
 import sys
-ROOT = '/Users/henryliu/Desktop/'
-sys.path += [ROOT+'abw/core', ROOT+'abw']
+ROOTS = ['/Users/henryliu/Desktop/manim-cp/', '/Users/samuelbrashears/PycharmProjects/manim-cp']
+for R in ROOTS: sys.path += [R, R+'core']
 from core  import *
 from manim import *
 
