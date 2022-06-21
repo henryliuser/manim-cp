@@ -1,0 +1,4 @@
+1. all ABW structures require a scene to be supplied.
+    animation methods within them depend on this scene
+
+2. animations should ONLY play on function call, never on attribute set.

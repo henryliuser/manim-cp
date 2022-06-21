@@ -1,2 +1,2 @@
-from Array import Array
-from colors import *
+from core.Array import Array
+from core.colors import *
