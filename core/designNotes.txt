@@ -2,3 +2,4 @@
     animation methods within them depend on this scene
 
 2. animations should ONLY play on function call, never on attribute set.
+    - optionally supply play=True on function call?

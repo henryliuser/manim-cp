@@ -1,6 +1,5 @@
 from manim import *
-from core.utils import *
-from core.colors import *
+from core import *
 
 # all ABW structures will optionally take a scene
 class Array(VGroup):
@@ -8,21 +7,26 @@ class Array(VGroup):
         def __init__(self, scene, *args, **kwargs):
             super().__init__(*args, **kwargs)  # hopefully this doesn't break shit
             self.scene = scene
-            mp = {
-                # mobs
-                "border"        : None,
-                "fill"          : None,
-                "value"         : None,
-                "value_repr"    : None,
-                # props
+            mobs = {
+                "value"  : None,
+                "tex"    : None,
+                "border" :
+                    Rectangle(height=1, width=1).set_stroke(BLUE, 5, 1),
+                "fill"   :
+                    Rectangle(height=.95, width=0.95).set_fill(BLACK, 0.7),
+            }
+            props = {
                 "outline_color" : BLUE,
                 "value_color"   : WHITE,
                 "cell_color"    : BLACK,
                 "height"        : 1,
                 "width"         : 1,
+                "stroke_width"  : 5,
             }
-            initWithDefaults(self, mp, **kwargs)
-            self.add( self.border )  # VGroup.add(self, self.border)
+            initWithDefaults(self, mobs, props, kwargs)
+            for mob in self.mobs:
+                self.add(mob)      # VGroup.add(self, mob)
+
 
         # def __setattr__(self, key, value):  # probably unneeded... not sure yet
         #     self.__dict__[key] = value
@@ -30,25 +34,39 @@ class Array(VGroup):
         #         # self.scene.play()  # play the interpolate anim
         #         pass
 
-        def set_val(self, val, **kwargs):  # func
-            self.value = val
-            new_tex = Tex( str(val) )
-            self.scene.play()
-            T = Tex()
-            T.animate.set_tex_string()
-            self.scene.play( self.value_repr.set_tex_ )
+        def anim_set_val(self, val):
+            self.mobs.value = val
+            ti = self.mobs.tex
+            tf = Tex( str(val) )
+            self.mobs.tex = tf
+            return Transform(ti, tf)
 
-        def highlight(self, col):
+        def anim_highlight(self, col):
+            f = self.mobs.fill
             self.cell_color = col
-            # self.scene.play( self.fill.animate.set_color() )
+            return f.animate.set_color(col)
 
-        def addToScene(self):
-            # for mob in self.mobs:
-            #     self.scene.add(mob)
-            self.scene.add( self.fill )
-            self.scene.add( self.border )
-            self.scene.add( self.value )
-            self.scene.add( self.value_repr )
+        # def slice(self, ):
+        #     pass
+
+        def add_to_scene(self, scene):
+            for mob in self.mobs:
+                scene.add(mob)
+
+    def init(self, A, **kwargs):
+        super().__init__(**kwargs)
+        arr = []
+        for x in A:
+            e = Array.Element(value=x)
+            arr += [e]
+
+        mobs = {
+            "arr" : arr,
+        }
+        props = {
+            "N" : len(A),
+        }
+        initWithDefaults(self, mobs, props, **kwargs)
 
 
 
@@ -118,5 +136,5 @@ class Array(VGroup):
         pass
 
     def __getitem__(self, i):  # exposes the i-th Array.Element.value
-        pass
+        return self.arr[i]
 
