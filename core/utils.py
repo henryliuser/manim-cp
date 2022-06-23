@@ -17,9 +17,10 @@ class Namespace:
         for k in to_pop:
             kwargs.pop(k)
 
+
 class ABWComponent:
     def __init__(self, mobs, props, kwargs):
         self.mobs  = Namespace(mobs, kwargs)
         self.props = Namespace(props, kwargs)
         self.mob = VGroup()
-        self.mob.add(*mobs.values())
+        self.mob.add(*self.mobs.__dict__.values())

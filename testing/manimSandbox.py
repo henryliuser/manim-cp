@@ -29,8 +29,6 @@ class Test(Scene):
     def construct(self):
         mf = MyFoo(
             haha=Integer(6),
-
         )
-
         self.play( Create(mf.mob) )
         self.play(Write( Tex(mf.props.elo) ))
