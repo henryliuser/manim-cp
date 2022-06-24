@@ -34,3 +34,4 @@ class ABWComponent:
         self.mobs = Namespace(mobs, kwargs)
         self.mob = VGroup()
         self.mob.add( *self.mobs.__dict__.values() )
+        self.mob.center()
