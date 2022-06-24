@@ -1,4 +1,5 @@
 from manim import *
+
 class Props:
     def __init__(self, namespace, toRegister):
         for k,v in namespace.items():
