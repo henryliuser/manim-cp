@@ -16,11 +16,20 @@ class Namespace:
                 self.__dict__[k] = v
         for k in to_pop:
             kwargs.pop(k)
+    def __iter__(self):
+        return self.__dict__.items().__iter__()
 
+# class ABWComponent:
+#     def __init__(self, props, mobs, kwargs):
+#         self.props = Namespace(eval(props.strip()), kwargs)
+#         for k,v in self.props: exec(f"{k} = {repr(v)}")
+#         self.mobs = Namespace(eval(mobs.strip()), kwargs)
+#         self.mob = VGroup()
+#         self.mob.add( *self.mobs.__dict__.values() )
 
 class ABWComponent:
-    def __init__(self, mobs, props, kwargs):
-        self.mobs  = Namespace(mobs, kwargs)
-        self.props = Namespace(props, kwargs)
+    def __init__(self, props, mobs, kwargs):
+        self.props = props
+        self.mobs = Namespace(mobs, kwargs)
         self.mob = VGroup()
-        self.mob.add(*self.mobs.__dict__.values())
+        self.mob.add( *self.mobs.__dict__.values() )

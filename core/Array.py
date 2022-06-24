@@ -4,17 +4,7 @@ from core import *
 # all ABW structures will optionally take a scene
 class Array(VGroup):
     class Element(VGroup):
-        def __init__(self, scene, *args, **kwargs):
-            super().__init__(*args, **kwargs)  # hopefully this doesn't break shit
-            self.scene = scene
-            mobs = {
-                "value"  : None,
-                "tex"    : None,
-                "border" :
-                    Rectangle(height=1, width=1).set_stroke(BLUE, 5, 1),
-                "fill"   :
-                    Rectangle(height=.95, width=0.95).set_fill(BLACK, 0.7),
-            }
+        def __init__(self, **props):
             props = {
                 "outline_color" : BLUE,
                 "value_color"   : WHITE,
@@ -22,10 +12,18 @@ class Array(VGroup):
                 "height"        : 1,
                 "width"         : 1,
                 "stroke_width"  : 5,
+                "value"         : None,
             }
-            initWithDefaults(self, mobs, props, kwargs)
-            for mob in self.mobs:
-                self.add(mob)      # VGroup.add(self, mob)
+            mobs = {
+
+                "tex"    : Tex(),
+                "border" :
+                    Rectangle(height=1, width=1).set_stroke(BLUE, 5, 1),
+                "fill"   :
+                    Rectangle(height=.95, width=0.95).set_fill(BLACK, 0.7),
+            }
+            mobs = Namespace(mobs, props)
+            super().__init__(mobs, props)
 
 
         # def __setattr__(self, key, value):  # probably unneeded... not sure yet
