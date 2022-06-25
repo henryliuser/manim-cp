@@ -15,7 +15,9 @@ class TestArray(Scene):
         self.wait(1)
         anim = [ A[i].anim_highlight(LIGHT_BROWN) for i in range(3) ]
         self.play( *anim )
-
+        self.wait(1)
+        ele, mob = A[1:4]
+        self.play( mob.animate.shift(2*DOWN) )
         self.wait(3)
 
 # env PYTHONPATH="/Users/henryliu/Desktop/manim-cp/" manim -pql testing/ArrayTest.py

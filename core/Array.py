@@ -1,5 +1,6 @@
 from manim import *
 from core import *
+from copy import deepcopy
 
 # all ABW structures will optionally take a scene
 class Array(ABWComponent):
@@ -57,5 +58,16 @@ class Array(ABWComponent):
         return self.props.arr[i].mob
 
     def __getitem__(self, i):  # exposes the i-th Array.Element
+        if isinstance(i, slice):
+            start = i.start if i.start else 0
+            stop  = i.stop  if i.stop  else self.props.N
+            step  = i.step  if i.step  else 1
+            ele, mob = [], VGroup()
+            for j in range(start, stop, step):
+                e = deepcopy(self[j])
+                ele += [e]
+                mob.add(e.mob)
+            return ele, mob
+
         return self.props.arr[i]
 
