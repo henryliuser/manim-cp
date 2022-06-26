@@ -33,7 +33,7 @@ class ABWComponent:
         self.props = props
         self.mobs = Namespace(mobs, kwargs)
         self.mob = VGroup( *self.mobs.__dict__.values() )
-        self.mob.center()
+        # self.mob.center()
 
 class StyleText(MarkupText):
     def __init__(self, text, **kwargs):

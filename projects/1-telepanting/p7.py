@@ -1,9 +1,9 @@
 from core import *
 from manim import *
-from _common import *
+from common import *
 
 # Add sample case (first line, then ant, then portals, then states, then show progression)
-class beat7(Scene):
+class p7(Scene):
     def construct(self):
         ax = NumberLine(
             x_range=[0, 9],
@@ -20,7 +20,9 @@ class beat7(Scene):
         self.play(Create(ant.mob))
         self.add_foreground_mobject(ant.mob)
         for p in portals:
-            self.play( *map(FadeIn, p.mob), run_time=1 )
-        while ant.props.pos != 9:
-            self.play(*t.tick(), ant.move(self, portals))
+            self.play(FadeIn(p.mob))
+        self.play(*[x.show_arc() for x in portals])
+        self.play(*[x.fade_arc() for x in portals])
 
+        while ant.props.pos != 9:
+            self.play(*t.tick(), *ant.move(self, portals))
