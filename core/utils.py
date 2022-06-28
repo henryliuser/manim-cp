@@ -35,7 +35,6 @@ class ABWComponent:
         self.mobs = Namespace(mobs, kwargs)
         self.mob = VGroup( *self.mobs.__dict__.values() )
 
-
 class StyleText(MarkupText):
     def __init__(self, text, **kwargs):
         t = [r'<span', text, '</span>']
