@@ -20,6 +20,7 @@ class Namespace:
     def __iter__(self):
         return self.__dict__.items().__iter__()
 
+
 # class ABWComponent:
 #     def __init__(self, props, mobs, kwargs):
 #         self.props = Namespace(eval(props.strip()), kwargs)
@@ -33,7 +34,7 @@ class ABWComponent:
         self.props = props
         self.mobs = Namespace(mobs, kwargs)
         self.mob = VGroup( *self.mobs.__dict__.values() )
-        self.mob.center()
+
 
 class StyleText(MarkupText):
     def __init__(self, text, **kwargs):
@@ -59,3 +60,4 @@ def flash(scene, mob, duration):
     scene.play( Create(mob) )
     scene.wait(duration)
     scene.play( FadeOut(mob) )
+
