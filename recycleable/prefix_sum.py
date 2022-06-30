@@ -16,7 +16,7 @@ class PSumDemo(Scene):
         N = 7
         A = Array( [1,3,2,7,9,5,4] )
         A.mob.shift(0.75*RIGHT)
-        Alab = Tex("$A = $").next_to(A.mob, LEFT)
+        Alab = Mono("$A = $").next_to(A.mob, LEFT)
         self.play( Create(A.mob), Write(Alab) )
         self.wait(2)
 
@@ -94,7 +94,7 @@ class PSumDemo(Scene):
         # in the worst case, we have to loop through the entire array, for each query.
 
         # and that brings us to prefix sums.
-        self.play( Create(title) )
+        self.play( Create(title), FadeOut(t) )
         self.wait(1)
 
         # you may have noticed that with the naive solution from before,
@@ -114,11 +114,59 @@ class PSumDemo(Scene):
         PS = Array(ps[1:])
         zero = Array.Element(value=0)
         PS.mob.next_to(A.mob, DOWN, buff=0.5)
+        PS.props.arr = [zero] + PS.props.arr
         zero.mob.next_to(PS.mob, LEFT, buff=0)
-        # PS.mob.add(zero.mob)
         PSlab = Tex("$ps = $").next_to(zero.mob, LEFT)
         self.play( Create(PS.mob), Create(zero.mob), Write(PSlab) )
 
+        for i in range(N):
+            anim = [ PS[i+1].anim_highlight(LIGHT_BROWN) ]
+            anim += [ A[i].anim_highlight(LIGHT_BROWN) ]
+            anim += [ PS[i].anim_highlight(BLACK) ]
+            self.play( *anim, run_time=0.4 )
+        self.wait(1)
+        anim = [ A[i].anim_highlight(BLACK) for i in range(N) ]
+        anim += [ PS[-1].anim_highlight(BLACK) ]
+        self.play( *anim, run_time=0.4 )
 
+        l,r = queries[0]
+        self.play( *map(FadeOut, [title, PS.mob, zero.mob, PSlab]) )
+        # arc = ArcBetweenPoints(UP,UP)
+        # sumTex = Tex().move_to(arc)
+        t = Mono(f"queries[0] = [{l},{r}]").center().to_edge(UP)
+        target = Alab.copy().shift(1.5*DOWN)
+        target2 = target.copy().shift(1.2*DOWN)
+        psr = Mono("ps[r] =").move_to(target).align_to(target, RIGHT)
+        psl = Mono("-ps[l-1] =").move_to(target2).align_to(target2, RIGHT)
+
+        self.play( Write(psr), Write(psl) )
+
+        # TODO: dot index on queries
+        # TODO: VGroup(psr, psl) -> 'ps[r] - ps[l-1]' =
+        # TODO: red slice line into fade out
+        for i, (l,r) in enumerate(queries):
+            t2 = Mono(f"queries[{i}] = [{l},{r}]").move_to(t)
+            abc = Transform(t, t2) if i else Write(t)
+            # tl, tr = map(Tex, "LR")
+            lp = A(l).get_center() + 0.6*UP + 0.2*LEFT
+            rp = A(r).get_center() + 0.6*UP + 0.2*RIGHT
+            arc = ArcBetweenPoints(start=lp, end=rp, angle= -PI/2)
+            # tl.next_to(A[l].mob, UP)
+            # tr.next_to(A[r].mob, UP)
+            # self.play( *map(Create, [tl,tr]) )
+            self.play( Create(arc) )
+            self.play( FadeOut(arc) )
+            eb, mb = A[:r+1]
+            es, ms = A[:l]
+
+            anim  = [ mb.animate.next_to(target, RIGHT), abc ]
+            if es: anim += [ ms.animate.next_to(target2, RIGHT) ]
+            self.play( *anim )
+            self.play( *map(FadeOut, [mb,ms,]) )
+            # lc = A[l].mob.get_center() + 0.6*UP + 0.2*LEFT
+            # rc = A[r].mob.get_center() + 0.6*UP + 0.2*RIGHT
+            # arc2 = ArcBetweenPoints(start=lc, end=rc, angle= -PI/2)
+            # sumTex2 = Tex("$\sum$").next_to(arc2, UP)
+            # self.play( Transform(arc, arc2), abc, Transform(sumTex, sumTex2) )  # add dot arc thing later
 
         self.wait(3)

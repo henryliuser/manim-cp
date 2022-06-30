@@ -53,15 +53,16 @@ class Array(ABWComponent):
             self(i).next_to(self(i-1), RIGHT, buff=0)
 
         super().__init__(my, mobs, kwargs)
+        self.mob.center()
 
     def __call__(self, i):  # exposes the i-th Array.Element.mob
         return self.props.arr[i].mob
 
     def __getitem__(self, i):  # exposes the i-th Array.Element
         if isinstance(i, slice):
-            start = i.start if i.start else 0
-            stop  = i.stop  if i.stop  else self.props.N
-            step  = i.step  if i.step  else 1
+            start = i.start if i.start != None else 0
+            stop  = i.stop  if i.stop  != None else self.props.N
+            step  = i.step  if i.step  != None else 1
             ele, mob = [], VGroup()
             for j in range(start, stop, step):
                 e = deepcopy(self[j])
@@ -70,4 +71,3 @@ class Array(ABWComponent):
             return ele, mob
 
         return self.props.arr[i]
-
