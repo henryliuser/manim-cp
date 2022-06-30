@@ -1,18 +1,18 @@
-from core import *
+from core.utils import *
 from manim import *
 from common import *
 
-# Add sample case (first line, then ant, then portals, then states, then show progression)
-class p7(Scene):
+class p2(Scene):
     def construct(self):
+        # Beat 4: [Pause, show small simulation]
         ax = NumberLine(
-            x_range=[0, 9],
+            x_range=[0, 5],
             length=10,
             color=BLUE,
             include_numbers=True
         )
         ant = Ant(ax=ax)
-        coords = [(3, 2, 0),(6, 5, 1),(7, 4, 0),(8, 1, 1)]
+        coords = [(2, 1, 1), (4, 3, 1)]
         portals = createPortals(coords, ax)
 
         self.play(Create(ax))
@@ -21,6 +21,5 @@ class p7(Scene):
         for p in portals:
             self.play(FadeIn(p.mob))
 
-        portal_arcs(self, portals)
-
-        simulate(self, ant, portals, ax, run_time=.2, indi=False)
+        t = simulate(self, ant, portals, ax)
+        self.play(*t.fade())

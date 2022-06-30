@@ -1,20 +1,22 @@
 from manim import *
 from core import *
-
+from random import random
 # prefix sum animation
 def psumAnim(A):
     ps = [0]
     for x in A:
-        ps += [ x + ps[-1] ]
+        ps += [x + ps[-1]]
 
     class Main(Scene):
         def construct(self):
             pass
 
+
 class Portal(ABWComponent):
     rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
-    DDR = DEFAULT_DOT_RADIUS*2
+    DDR = DEFAULT_DOT_RADIUS * 2
     i = 0
+
     def __init__(self, **kwargs):
         props = {
             "x": 1,
@@ -22,15 +24,12 @@ class Portal(ABWComponent):
             "ax": None,
             "open": True,
             "color": Portal.rainbow[Portal.i],
-            # "entrance_label": ''
         }
         my = self.props = Namespace(props, kwargs)
         r = Portal.DDR if my.open else 0.0001 * Portal.DDR
         mobs = {
-            'entrance': Dot(radius=1.5*Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
-            # 'entrance_label': Tex(my.entrance_label,font_size=15)
-            #     .move_to(my.ax.n2p(my.x)).shift(UP*.33),
-            'exit': Dot(radius=.75*Portal.DDR, point=my.ax.n2p(my.y), color=my.color),
+            'entrance': Dot(radius=1.5 * Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
+            'exit': Dot(radius=.75 * Portal.DDR, point=my.ax.n2p(my.y), color=my.color),
             'opening': Dot(radius=r, point=my.ax.n2p(my.x), color=BLACK),
         }
         super().__init__(my, mobs, kwargs)
@@ -46,21 +45,26 @@ class Portal(ABWComponent):
         else:
             return ScaleInPlace(m.opening, 0.0001, run_time=run_time)
 
-    def show_arc(self):
+    def show_arc(self, func=None):
         p = self.mobs
         arc = ArcBetweenPoints(start=p.entrance.get_center(),
-                             end=p.exit.get_center(),
-                             stroke_color=self.props.color,
-                             z_index=-2)
+                               end=p.exit.get_center(),
+                               stroke_color=self.props.color,
+                               z_index=-2)
         self.mobs.arc = arc
+        if func is not None:
+            return Create(arc, rate_func=func)
         return Create(arc)
 
-    def show_arrow(self):
-        arrow = Circle(radius=.06, color=self.props.color,
+    def show_arrow(self, func=None):
+        s = self.mobs.arc.get_stroke_width()
+        arrow = Circle(radius=0.015*s, color=self.props.color,
                        fill_opacity=1, fill_color=self.props.color,
                        z_index=-1)
         self.mobs.arrow = arrow
-        return MoveAlongPath(self.mobs.arrow, self.mobs.arc, run_time=2)
+        if func is not None:
+            return MoveAlongPath(self.mobs.arrow, self.mobs.arc, rate_func=func)
+        return MoveAlongPath(self.mobs.arrow, self.mobs.arc)
         # self.mobs.arrow = arrow
         # return self.mobs.create_tip.arc()
         # p = self.mobs
@@ -76,7 +80,6 @@ class Portal(ABWComponent):
         return FadeOut(self.mobs.arc, self.mobs.arrow)
 
 
-
 class Ant(ABWComponent):
     def __init__(self, **kwargs):
         props = {
@@ -88,18 +91,21 @@ class Ant(ABWComponent):
         DDR = DEFAULT_DOT_RADIUS
         mobs = {
             'dot': Dot(my.ax.n2p(my.pos), color=my.color, radius=DDR * 2.2),
-            #'label': Tex('A', font_size=22, color=invert_color(my.color)).move_to(my.ax.n2p(my.pos)),
+            # 'label': Tex('A', font_size=22, color=invert_color(my.color)).move_to(my.ax.n2p(my.pos)),
             'eye': Dot(my.ax.n2p(my.pos) + UP * .02 + RIGHT * .075,
                        color=BLACK, radius=DDR * .5)
         }
         super().__init__(my, mobs, kwargs)
+        self.mob.generate_target()
 
-    def anim_pos(self):
+    def anim_pos(self, run_time=1):
         ax = self.props.ax
         pos = self.props.pos
-        return self.mob.animate.move_to(ax.n2p(pos))
+        self.mob.target.move_to(ax.n2p(pos))
+        return MoveToTarget(self.mob, run_time=run_time)
+        # return self.mob.animate.move_to(ax.n2p(pos))
 
-    def move(self, scene, portals):
+    def move(self, scene, portals, run_time=1):
         a = self.props
         a.pos += 1
         for portal in portals:
@@ -107,10 +113,12 @@ class Ant(ABWComponent):
             if a.pos - 1 == p.x:
                 if p.open:
                     a.pos = portal.props.y
-                    scene.play(self.anim_pos(), portal.toggle())
-                    return self.move(scene, portals)
-                return [portal.toggle(run_time=.5), self.anim_pos()]
-        return [self.anim_pos()]
+                    scene.play(self.anim_pos(run_time=run_time/2),
+                               portal.toggle(run_time=run_time/2))
+                    return self.move(scene, portals, run_time=run_time)
+                return [portal.toggle(run_time=run_time / 2),
+                        self.anim_pos(run_time=run_time)]
+        return [self.anim_pos(run_time=run_time)]
 
 
 class Timer(ABWComponent):
@@ -126,14 +134,31 @@ class Timer(ABWComponent):
         super().__init__(my, mobs, kwargs)
         self.mob.arrange(RIGHT)
         self.mob.shift(UP)
-
-
-    def tick(self):
         m = self.mobs
+        m.val.align_to(m.text)
+        # m.val.target.move_
+
+    def tick(self, run_time=1, rate_func=None):
+        if rate_func is None:
+            rate_func = squish_rate_func(smooth, .9, 1)
+        m = self.mobs
+
         self.props.t += 1
-        return [ApplyWave(m.text, run_time=1),
-                ApplyWave(m.val, run_time=1),
-                m.val.animate.set_value(self.props.t)]
+        a = Integer(self.props.t)
+        a.move_to(m.val)
+        r = [FadeOut(m.val, run_time=run_time, rate_func=rate_func),
+             FadeIn(a, run_time=run_time, rate_func=rate_func)]
+        m.val = a
+        return r
+
+    def light(self, run_time=1):
+        m = self.mobs
+        return [Indicate(m.val, run_time=run_time),
+                Indicate(m.text, run_time=run_time)]
+
+    def fade(self):
+        m = self.mobs
+        return [FadeOut(m.val), FadeOut(m.text)]
 
     def reset(self, ant):
         m = self.mobs
@@ -144,12 +169,58 @@ class Timer(ABWComponent):
                 ApplyWave(m.val, run_time=1),
                 m.val.animate.set_value(self.props.t)]
 
+def simulate(scene, ant, portals, ax, t=None,
+             indi=True, run_time=.5, steps=1000, start_pos=0):
+    if start_pos != -1:
+        ant.props.pos = start_pos
+    scene.play(ant.anim_pos())
+    if t is None:
+        t = Timer()
+        scene.play(FadeIn(t.mob))
+    for _ in range(steps):
+        if ant.props.pos == ax.x_range[1]:
+            break
+        scene.play(*ant.move(scene, portals, run_time=run_time),
+                  *t.tick(run_time=run_time))
+        if indi:
+            scene.play(*t.light(.1))
+    return t
+
+def portal_arcs(scene, portals):
+    scene.play(*[x.show_arc() for x in portals])
+    scene.play(*[x.show_arrow() for x in portals])
+    scene.bring_to_back(*[x.mobs.arc for x in portals])
+    a = [x.fade_arc() for x in portals]
+    a += [Indicate(x.mobs.entrance, run_time=.0001) for x in portals]
+    scene.play(*a)
+
+def stagger_arcs(scene, portals, run_time=1, move_time=2):
+    A = []
+    for p in portals:
+        c = random()*.5
+        d = random()*.5 + .5
+        f = squish_rate_func(smooth, c, d)
+        A.append(p.show_arc(f))
+    scene.play(*A, run_time=run_time)
+
+    # B = []
+    # for p in portals:
+    #     c = random()*.5
+    #     d = random()*.5 + .5
+    #     f = squish_rate_func(smooth, c, d)
+    #     B.append(p.show_arrow(f))
+    # scene.play(*B, run_time=move_time)
+    scene.play(*[x.show_arrow() for x in portals])
+
+    scene.bring_to_back(*[x.mobs.arc for x in portals])
+    a = [x.fade_arc() for x in portals]
+    a += [Indicate(x.mobs.entrance, run_time=.0001) for x in portals]
+    scene.play(*a)
 
 
 
 def createPortals(tuples, ax):
     res = []
     for x, y, o in tuples:
-        res.append(Portal(x=x,y=y,open=o,ax=ax))
+        res.append(Portal(x=x, y=y, open=o, ax=ax))
     return res
-
