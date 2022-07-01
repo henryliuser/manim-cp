@@ -12,29 +12,6 @@ def psumAnim(A):
             pass
 
 
-class Portal(ABWComponent):
-    rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
-    DDR = DEFAULT_DOT_RADIUS * 2
-    i = 0
-
-    def __init__(self, **kwargs):
-        props = {
-            "x": 1,
-            "y": 0,
-            "ax": None,
-            "open": True,
-            "color": Portal.rainbow[Portal.i],
-        }
-        my = self.props = Namespace(props, kwargs)
-        r = Portal.DDR if my.open else 0.0001 * Portal.DDR
-        mobs = {
-            'entrance': Dot(radius=1.5 * Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
-            'exit': Dot(radius=.75 * Portal.DDR, point=my.ax.n2p(my.y), color=my.color),
-            'opening': Dot(radius=r, point=my.ax.n2p(my.x), color=BLACK),
-        }
-        super().__init__(my, mobs, kwargs)
-        if self.props.color == Portal.rainbow[Portal.i]:
-            Portal.i = (Portal.i + 1) % len(Portal.rainbow)
 # class Portal(ABWComponent):
 #     rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
 #     DDR = DEFAULT_DOT_RADIUS * 2
@@ -53,14 +30,42 @@ class Portal(ABWComponent):
 #         mobs = {
 #             'entrance': Dot(radius=1.5 * Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
 #             'exit': Dot(radius=.75 * Portal.DDR, point=my.ax.n2p(my.y), color=my.color),
-#             'opening': Line(radius=r, point=my.ax.n2p(my.x), color=BLACK),
-#             'circ': Circle(radius=.75 * Portal.DDR, color=BLACK)
+#             'opening': Dot(radius=r, point=my.ax.n2p(my.x), color=BLACK),
 #         }
 #         super().__init__(my, mobs, kwargs)
-#         m = self.mobs
-#         m.circ.move_to(m.entrance)
 #         if self.props.color == Portal.rainbow[Portal.i]:
 #             Portal.i = (Portal.i + 1) % len(Portal.rainbow)
+
+class Portal(ABWComponent):
+    rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
+    DDR = DEFAULT_DOT_RADIUS * 1.9
+    i = 0
+
+    def __init__(self, **kwargs):
+        props = {
+            "x": 1,
+            "y": 0,
+            "ax": None,
+            "open": True,
+            "color": Portal.rainbow[Portal.i],
+        }
+        my = self.props = Namespace(props, kwargs)
+        r = Portal.DDR if my.open else 0.0001 * Portal.DDR
+        mobs = {
+            'entrance': Dot(radius=1.5 * Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
+            'exit': Dot(radius=.75 * Portal.DDR, point=my.ax.n2p(my.y), color=my.color),
+            'line': Line(color=BLACK),
+            'circ': Circle(radius=Portal.DDR, color=BLACK),
+            'opening': Dot(radius=r, point=my.ax.n2p(my.x), color=BLACK),
+        }
+        super().__init__(my, mobs, kwargs)
+        m = self.mobs
+        m.circ.move_to(m.entrance)
+        top = m.circ.point_at_angle(PI/4)
+        bottom = m.circ.point_at_angle(PI/4 + PI)
+        m.line.put_start_and_end_on(top, bottom)
+        if self.props.color == Portal.rainbow[Portal.i]:
+            Portal.i = (Portal.i + 1) % len(Portal.rainbow)
 
     def toggle(self, run_time=1):
         p = self.props
