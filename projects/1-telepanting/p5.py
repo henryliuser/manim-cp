@@ -49,10 +49,5 @@ class p3(Scene):
                  steps=20, start_pos=-1, t=t)
         simulate(self, ant, portals, ax, run_time=1 / 60,
                  indi=False, start_pos=-1, t=t, steps=240)
-        # simulate(self, ant, portals, ax, run_time=1 / 10, indi=False,
-        #          steps=10, start_pos=-1, t=t)
-        # t = simulate(self, ant, portals, ax, run_time=1 / 3, indi=False,
-        #              steps=3, start_pos=-1, t=t)
         self.wait(1)
-
         # fade out in post
