@@ -55,8 +55,6 @@ class Mono(MarkupText):
         t = ['<span font_family="monaco" font-size="xx-small">', text, '</span>']
         super().__init__( ''.join(t), **kwargs )
 
-def flash(scene, mob, duration):
-    scene.play( Create(mob) )
-    scene.wait(duration)
-    scene.play( FadeOut(mob) )
+def Flash(mob, duration):
+    return FadeIn(mob, rate_func=there_and_back_with_pause, run_time=duration)
 

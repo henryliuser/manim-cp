@@ -18,7 +18,7 @@ class Array(ABWComponent):
             my = self.props = Namespace(props, kwargs)
             mobs =  {
                 "fill"   :
-                    Rectangle(height=.95, width=0.95, color=my.cell_color)
+                    Rectangle(height=.98, width=0.98, color=my.cell_color)
                         .set_fill(my.cell_color, opacity=0.7),
 
                 "border" :
@@ -35,10 +35,10 @@ class Array(ABWComponent):
             res = Transform(self.mobs.tex, tf)
             return res
 
-        def anim_highlight(self, col):
+        def anim_highlight(self, col, **kwargs):
             f = self.mobs.fill
             self.props.cell_color = col
-            return f.animate.set_color(col)
+            return FadeToColor(f, col, **kwargs)
 
     def __init__(self, A, **kwargs):
         props = {

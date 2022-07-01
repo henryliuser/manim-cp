@@ -2,6 +2,7 @@ import sys
 from manim import *
 from core import *
 
+
 # TODO: add indices
 
 class PSumDemo(Scene):
@@ -10,13 +11,13 @@ class PSumDemo(Scene):
         # sum of any subarray in O(1), or constant time.
         # Because it's a general technique, I'll only give a brief summary here.
         title = StyleText("Prefix Sums", bold=1).to_edge(UP)
-        flash(self, title, 0.5)
+        self.play( Flash(title, 0.5) )
 
         # suppose we had the following integer array A of size N, in this case, 7
         N = 7
         A = Array( [1,3,2,7,9,5,4] )
         A.mob.shift(0.75*RIGHT)
-        Alab = Mono("$A = $").next_to(A.mob, LEFT)
+        Alab = Mono("A = ").next_to(A.mob, LEFT)
         self.play( Create(A.mob), Write(Alab) )
         self.wait(2)
 
@@ -151,18 +152,38 @@ class PSumDemo(Scene):
             lp = A(l).get_center() + 0.6*UP + 0.2*LEFT
             rp = A(r).get_center() + 0.6*UP + 0.2*RIGHT
             arc = ArcBetweenPoints(start=lp, end=rp, angle= -PI/2)
+
+            anim = [
+                A[j].anim_highlight(LIGHT_BROWN,
+                  run_time=1.5,
+                  rate_func=there_and_back_with_pause)
+                for j in range(l,r+1)
+            ]
+
             # tl.next_to(A[l].mob, UP)
             # tr.next_to(A[r].mob, UP)
             # self.play( *map(Create, [tl,tr]) )
-            self.play( Create(arc) )
+            self.play( Create(arc), *anim )
             self.play( FadeOut(arc) )
             eb, mb = A[:r+1]
             es, ms = A[:l]
 
-            anim  = [ mb.animate.next_to(target, RIGHT), abc ]
+            anim = [ mb.animate.next_to(target, RIGHT), abc ]
             if es: anim += [ ms.animate.next_to(target2, RIGHT) ]
             self.play( *anim )
-            self.play( *map(FadeOut, [mb,ms,]) )
+
+            if es:
+                slice = Rectangle(color=RED, fill_opacity=1, fill_color=RED, height=3, width=0.02)
+                mid = midpoint( es[-1].mob.get_center(), eb[l].mob.get_center() )
+                slice.move_to(mid)
+                anim = [ Flash(slice, 1.3) ]
+                for i in range(l):
+                    anim += [ *map(FadeOut, [es[i].mob, eb[i].mob]) ]
+                self.play( *anim )
+
+            anim  = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
+            self.play( *anim )
+
             # lc = A[l].mob.get_center() + 0.6*UP + 0.2*LEFT
             # rc = A[r].mob.get_center() + 0.6*UP + 0.2*RIGHT
             # arc2 = ArcBetweenPoints(start=lc, end=rc, angle= -PI/2)
