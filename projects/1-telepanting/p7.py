@@ -23,4 +23,14 @@ class p7(Scene):
 
         portal_arcs(self, portals)
 
-        simulate(self, ant, portals, ax, run_time=.2, indi=False)
+        t = simulate(self, ant, portals, ax, run_time=.5, indi=False)
+
+        self.play(*t.fade())
+
+        # Beat 8: [Replay ant movement]
+        simulate(self, ant, portals, ax, run_time=.5, indi=False, steps=9)
+
+        rf= there_and_back
+        a = [ScaleInPlace(x.mobs.entrance, 1.5, rate_func=rf) for x in portals[:2]]
+        a += [ScaleInPlace(x.mobs.opening, 1.5, rate_func=rf) for x in portals[:2]]
+        self.play(*a)
