@@ -35,6 +35,32 @@ class Portal(ABWComponent):
         super().__init__(my, mobs, kwargs)
         if self.props.color == Portal.rainbow[Portal.i]:
             Portal.i = (Portal.i + 1) % len(Portal.rainbow)
+# class Portal(ABWComponent):
+#     rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
+#     DDR = DEFAULT_DOT_RADIUS * 2
+#     i = 0
+#
+#     def __init__(self, **kwargs):
+#         props = {
+#             "x": 1,
+#             "y": 0,
+#             "ax": None,
+#             "open": True,
+#             "color": Portal.rainbow[Portal.i],
+#         }
+#         my = self.props = Namespace(props, kwargs)
+#         r = Portal.DDR if my.open else 0.0001 * Portal.DDR
+#         mobs = {
+#             'entrance': Dot(radius=1.5 * Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
+#             'exit': Dot(radius=.75 * Portal.DDR, point=my.ax.n2p(my.y), color=my.color),
+#             'opening': Line(radius=r, point=my.ax.n2p(my.x), color=BLACK),
+#             'circ': Circle(radius=.75 * Portal.DDR, color=BLACK)
+#         }
+#         super().__init__(my, mobs, kwargs)
+#         m = self.mobs
+#         m.circ.move_to(m.entrance)
+#         if self.props.color == Portal.rainbow[Portal.i]:
+#             Portal.i = (Portal.i + 1) % len(Portal.rainbow)
 
     def toggle(self, run_time=1):
         p = self.props
@@ -234,4 +260,23 @@ def createPortals(tuples, ax):
     res = []
     for x, y, o in tuples:
         res.append(Portal(x=x, y=y, open=o, ax=ax))
+    return res
+
+#highlight left portals
+def hlp(ant, portals):
+    pos = ant.props.pos
+    a = []
+    for p in portals:
+        if p.props.x >= pos:
+            break
+        rf = there_and_back
+        a.append(ScaleInPlace(p.mobs.entrance, 1.5, rate_func=rf))
+        a.append(ScaleInPlace(p.mobs.opening, 1.5, rate_func=rf))
+    return a
+
+def portal_map(portals):
+    res = {}
+    for p in portals:
+        res[p.props.x] = p.mobs.entrance
+        res[p.props.y] = p.mobs.exit
     return res

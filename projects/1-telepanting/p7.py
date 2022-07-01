@@ -27,10 +27,11 @@ class p7(Scene):
 
         self.play(*t.fade())
 
+        b = [4, 8, 13, 17, 21, 22, 23]
+        c = [5, 5, 4, 4, 1, 1]
         # Beat 8: [Replay ant movement]
-        simulate(self, ant, portals, ax, run_time=.5, indi=False, steps=9)
-
-        rf= there_and_back
-        a = [ScaleInPlace(x.mobs.entrance, 1.5, rate_func=rf) for x in portals[:2]]
-        a += [ScaleInPlace(x.mobs.opening, 1.5, rate_func=rf) for x in portals[:2]]
-        self.play(*a)
+        t = simulate(self, ant, portals, ax, run_time=.5, indi=False, steps=4)
+        for x in c:
+            simulate(self, ant, portals, ax, run_time=.5,
+                     indi=False, steps=x, t=t, start_pos=-1)
+            self.play(*hlp(ant, portals))
