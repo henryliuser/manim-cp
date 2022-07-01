@@ -77,7 +77,10 @@ class Portal(ABWComponent):
         # return FadeIn(arrow)
 
     def fade_arc(self):
-        return FadeOut(self.mobs.arc, self.mobs.arrow)
+        return FadeOut(self.mobs.arc)
+
+    def fade_arrow(self):
+        return FadeOut(self.mobs.arrow)
 
 
 class Ant(ABWComponent):
@@ -103,7 +106,6 @@ class Ant(ABWComponent):
         pos = self.props.pos
         self.mob.target.move_to(ax.n2p(pos))
         return MoveToTarget(self.mob, run_time=run_time)
-        # return self.mob.animate.move_to(ax.n2p(pos))
 
     def move(self, scene, portals, run_time=1):
         a = self.props
@@ -140,12 +142,15 @@ class Timer(ABWComponent):
 
     def tick(self, run_time=1, rate_func=None):
         if rate_func is None:
-            rate_func = squish_rate_func(smooth, .9, 1)
+            if run_time > .2:
+                rate_func = squish_rate_func(smooth, .9, 1)
+            else:
+                rate_func = smooth
         m = self.mobs
-
         self.props.t += 1
         a = Integer(self.props.t)
         a.move_to(m.val)
+        a.next_to(m.text)
         r = [FadeOut(m.val, run_time=run_time, rate_func=rate_func),
              FadeIn(a, run_time=run_time, rate_func=rate_func)]
         m.val = a
@@ -170,10 +175,11 @@ class Timer(ABWComponent):
                 m.val.animate.set_value(self.props.t)]
 
 def simulate(scene, ant, portals, ax, t=None,
-             indi=True, run_time=.5, steps=1000, start_pos=0):
+             indi=True, run_time=.5, steps=1000,
+             start_pos=0):
     if start_pos != -1:
         ant.props.pos = start_pos
-    scene.play(ant.anim_pos())
+        scene.play(ant.anim_pos())
     if t is None:
         t = Timer()
         scene.play(FadeIn(t.mob))
@@ -191,10 +197,11 @@ def portal_arcs(scene, portals):
     scene.play(*[x.show_arrow() for x in portals])
     scene.bring_to_back(*[x.mobs.arc for x in portals])
     a = [x.fade_arc() for x in portals]
+    a += [x.fade_arrow() for x in portals]
     a += [Indicate(x.mobs.entrance, run_time=.0001) for x in portals]
     scene.play(*a)
 
-def stagger_arcs(scene, portals, run_time=1, move_time=2):
+def stagger_arcs(scene, portals, run_time=1, arrow=True):
     A = []
     for p in portals:
         c = random()*.5
@@ -202,7 +209,6 @@ def stagger_arcs(scene, portals, run_time=1, move_time=2):
         f = squish_rate_func(smooth, c, d)
         A.append(p.show_arc(f))
     scene.play(*A, run_time=run_time)
-
     # B = []
     # for p in portals:
     #     c = random()*.5
@@ -210,10 +216,13 @@ def stagger_arcs(scene, portals, run_time=1, move_time=2):
     #     f = squish_rate_func(smooth, c, d)
     #     B.append(p.show_arrow(f))
     # scene.play(*B, run_time=move_time)
-    scene.play(*[x.show_arrow() for x in portals])
+    if arrow:
+        scene.play(*[x.show_arrow() for x in portals])
 
     scene.bring_to_back(*[x.mobs.arc for x in portals])
     a = [x.fade_arc() for x in portals]
+    if arrow:
+        a += [x.fade_arrow() for x in portals]
     a += [Indicate(x.mobs.entrance, run_time=.0001) for x in portals]
     scene.play(*a)
 
