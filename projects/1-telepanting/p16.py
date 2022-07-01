@@ -13,12 +13,12 @@ class p16(Scene):
         )
 
         ant = Ant(ax=ax)
-        X = [3, 6, 7, 8]
-        Y = [2, 5, 4, 1]
-        S = [0, 1, 0, 1]
-        N = len(X)
+        x = [3, 6, 7, 8]
+        y = [2, 5, 4, 1]
+        s = [0, 1, 0, 1]
+        N = len(x)
         s1 = VGroup(ant.mob, ax)
-        coords = [ *map(tuple, zip(X,Y,S)) ]
+        coords = [ *map(tuple, zip(x,y,s)) ]
         portals = createPortals(coords, ax)
 
         self.play(Create(ax))
