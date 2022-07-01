@@ -192,12 +192,14 @@ def simulate(scene, ant, portals, ax, t=None,
             scene.play(*t.light(.1))
     return t
 
-def portal_arcs(scene, portals):
+def portal_arcs(scene, portals, arrow=True):
     scene.play(*[x.show_arc() for x in portals])
-    scene.play(*[x.show_arrow() for x in portals])
+    if arrow:
+        scene.play(*[x.show_arrow() for x in portals])
     scene.bring_to_back(*[x.mobs.arc for x in portals])
     a = [x.fade_arc() for x in portals]
-    a += [x.fade_arrow() for x in portals]
+    if arrow:
+        a += [x.fade_arrow() for x in portals]
     a += [Indicate(x.mobs.entrance, run_time=.0001) for x in portals]
     scene.play(*a)
 
