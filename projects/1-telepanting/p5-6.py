@@ -32,12 +32,15 @@ class p3(Scene):
         #                 break
         # raise OSError(coords)
         portals = createPortals(coords, ax)
-        A = [ax, *[p.mob for p in portals]]
+        a = []
+        for p in portals:
+            a.append(VGroup(p.mobs.entrance, p.mobs.exit, p.mobs.opening))
+
+        A = [ax, *a]
 
         self.play(Create(ax), run_time=.1)
-        # self.play(Create(ant.mob))
-        # self.add_foreground_mobject(ant.mob)
-        self.play(*[FadeIn(p.mob) for p in portals], run_time=.5)
+        self.play(*[FadeIn(x) for x in a], run_time=.5)
+
         self.play(ScaleInPlace(VGroup(*A), 12 / size, run_time=3))
         stagger_arcs(self, portals, arrow=False)
         ant = Ant(ax=ax)
