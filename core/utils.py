@@ -1,4 +1,5 @@
 from manim import *
+from core.aliases import *
 
 class Props:
     def __init__(self, namespace, toRegister):
@@ -55,6 +56,61 @@ class Mono(MarkupText):
         t = ['<span font_family="monaco" font-size="xx-small">', text, '</span>']
         super().__init__( ''.join(t), **kwargs )
 
-def Flash(mob, duration):
-    return FadeIn(mob, rate_func=there_and_back_with_pause, run_time=duration)
+def Peek(mob, duration=1):
+    return FadeIn(mob, rate_func=flash, run_time=duration)
 
+def getCorners(mob : Mobject):
+    return mob.get_corner(DOWN+LEFT), \
+           mob.get_corner(UP+RIGHT)
+
+def getBoundingBox(mob : Mobject, opacity=0.5):
+    bl, tr = getCorners(mob)
+    dim = tr - bl
+    mid = midpoint(bl, tr)
+    return Rectangle(
+        fill_opacity=opacity,
+        fill_color=PINK,
+        color=RED,
+        width=dim[0],
+        height=dim[1],
+        z_index=1000,
+    ).move_to(mid)
+
+def width(mob : Mobject):
+    bl, tr = getCorners(mob)
+    return (tr-bl)[0]
+
+def height(mob : Mobject):
+    bl, tr = getCorners(mob)
+    return (tr-bl)[1]
+
+def intersectingArea(A,B,C,D,E,F,G,H):
+    return max(min(C,G)-max(A,E), 0)*max(min(D,H)-max(B,F), 0)
+
+class CodeBlock(Code):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.lines = self.code.lines[0]
+
+
+    # @return y-coord of the i-th line of code
+    def __call__(self, i):
+        line = self.lines[i]
+        xc = line.get_corner(UP+RIGHT)[0]
+        if i == 0: return xc, line.get_center()[1]
+        bl, tr = getCorners(line)
+        if (tr-bl)[1] < 1e-2: raise ValueError("empty line")
+        for j in range(i+1, len(self.lines)):
+            if height( self.lines[j] ) > 1e-2:
+                break
+        nxtl = self.lines[j]
+        b0 = [ x for y in getCorners(nxtl) for x in y[:2] ]
+        b1 = [ x for y in getCorners(line) for x in y[:2] ]
+
+        if intersectingArea(*b0, *b1) < 1e-3:
+            return xc, line.get_center()[1]
+
+        return nxtl.get_corner(UP+RIGHT), nxtl.get_corner(UP+RIGHT)[1]
+
+    def __getitem__(self, i):
+        return self.lines[i]

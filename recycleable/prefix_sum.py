@@ -184,6 +184,7 @@ class PSumDemo(Scene):
             anim  = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
             self.play( *anim )
 
+
             # lc = A[l].mob.get_center() + 0.6*UP + 0.2*LEFT
             # rc = A[r].mob.get_center() + 0.6*UP + 0.2*RIGHT
             # arc2 = ArcBetweenPoints(start=lc, end=rc, angle= -PI/2)

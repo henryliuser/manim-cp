@@ -45,6 +45,7 @@ class Array(ABWComponent):
             "N"   : len(A),
             "arr" : [ Array.Element(value=x) for x in A ],
         }
+        self.og = A
         my = self.props = Namespace(props, kwargs)
 
         # align the cells next to each other
