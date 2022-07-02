@@ -2,7 +2,7 @@ from core.utils import *
 from manim import *
 from common import *
 
-class p2(Scene):
+class p4(Scene):
     def construct(self):
         # Beat 4: [Pause, show small simulation]
         ax = NumberLine(

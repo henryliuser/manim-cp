@@ -1,16 +1,6 @@
 from manim import *
 from core import *
 from random import random
-# prefix sum animation
-def psumAnim(A):
-    ps = [0]
-    for x in A:
-        ps += [x + ps[-1]]
-
-    class Main(Scene):
-        def construct(self):
-            pass
-
 
 # class Portal(ABWComponent):
 #     rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
@@ -138,7 +128,7 @@ class Ant(ABWComponent):
         self.mob.target.move_to(ax.n2p(pos))
         return MoveToTarget(self.mob, run_time=run_time)
 
-    def move(self, scene, portals, run_time=1):
+    def move(self, scene, portals, run_time=1, hl=False):
         a = self.props
         a.pos += 1
         for portal in portals:
@@ -148,9 +138,13 @@ class Ant(ABWComponent):
                     a.pos = portal.props.y
                     scene.play(self.anim_pos(run_time=run_time/2),
                                portal.toggle(run_time=run_time/2))
+                    if hl:
+                        a = hlp(self, portals, run_time=run_time)
+                        if a:
+                            scene.play(*a)
                     return self.move(scene, portals, run_time=run_time)
                 return [portal.toggle(run_time=run_time / 2),
-                        self.anim_pos(run_time=run_time)]
+                    self.anim_pos(run_time=run_time)]
         return [self.anim_pos(run_time=run_time)]
 
 
@@ -207,7 +201,7 @@ class Timer(ABWComponent):
 
 def simulate(scene, ant, portals, ax, t=None,
              indi=True, run_time=.5, steps=1000,
-             start_pos=0):
+             start_pos=0, hl = False):
     if start_pos != -1:
         ant.props.pos = start_pos
         scene.play(ant.anim_pos())
@@ -217,8 +211,11 @@ def simulate(scene, ant, portals, ax, t=None,
     for _ in range(steps):
         if ant.props.pos == ax.x_range[1]:
             break
-        scene.play(*ant.move(scene, portals, run_time=run_time),
-                  *t.tick(run_time=run_time))
+        a = []
+        if t != -1:
+            a = t.tick(run_time=run_time)
+        scene.play(*ant.move(scene, portals,
+                             run_time=run_time, hl=hl), *a)
         if indi:
             scene.play(*t.light(.1))
     return t
@@ -268,15 +265,24 @@ def createPortals(tuples, ax):
     return res
 
 #highlight left portals
-def hlp(ant, portals):
+def hlp(ant, portals, run_time=1):
     pos = ant.props.pos
     a = []
     for p in portals:
         if p.props.x >= pos:
             break
         rf = there_and_back
-        a.append(ScaleInPlace(p.mobs.entrance, 1.5, rate_func=rf))
-        a.append(ScaleInPlace(p.mobs.opening, 1.5, rate_func=rf))
+        a.append(ScaleInPlace(p.mobs.entrance, 1.5, rate_func=rf, run_time=run_time))
+        a.append(ScaleInPlace(p.mobs.opening, 1.5, rate_func=rf, run_time=run_time))
+    return a
+
+#highlight portals
+def hp(portals, run_time=1):
+    a = []
+    rf = there_and_back
+    for p in portals:
+        a.append(ScaleInPlace(p.mobs.entrance, 1.5, rate_func=rf, run_time=run_time))
+        a.append(ScaleInPlace(p.mobs.opening, 1.5, rate_func=rf, run_time=run_time))
     return a
 
 def portal_map(portals):
@@ -285,3 +291,10 @@ def portal_map(portals):
         res[p.props.x] = p.mobs.entrance
         res[p.props.y] = p.mobs.exit
     return res
+
+def reset_portals(portals, coords):
+    a = []
+    for p, c in zip(portals, coords):
+        if bool(p.props.open) != bool(c[2]):
+            a.append(p.toggle())
+    return a
