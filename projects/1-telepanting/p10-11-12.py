@@ -59,3 +59,4 @@ class p10(Scene):
         self.wait(1)
         self.play(*reset_portals(portals, coords))
         self.wait(1)
+        

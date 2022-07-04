@@ -151,11 +151,12 @@ class Ant(ABWComponent):
 class Timer(ABWComponent):
     def __init__(self, **kwargs):
         props = {
-            't': 0
+            't': 0,
+            'label': 't = '
         }
         my = self.props = Namespace(props, kwargs)
         mobs = {
-            'text': Tex(r't = '),
+            'text': Tex(my.label),
             'val': Integer(my.t),
         }
         super().__init__(my, mobs, kwargs)
