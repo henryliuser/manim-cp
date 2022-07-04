@@ -9,7 +9,8 @@ class p7(Scene):
             x_range=[0, 9],
             length=10,
             color=BLUE,
-            include_numbers=True
+            include_numbers=True,
+            line_to_number_buff=MED_LARGE_BUFF,
         )
         ant = Ant(ax=ax)
         coords = [(3, 2, 0),(6, 5, 1),(7, 4, 0),(8, 1, 1)]

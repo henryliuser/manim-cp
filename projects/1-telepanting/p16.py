@@ -9,7 +9,8 @@ class p16(Scene):
             x_range=[0, 9],
             length=10,
             color=BLUE,
-            include_numbers=True
+            include_numbers=True,
+            line_to_number_buff=MED_LARGE_BUFF,
         )
 
         N = 4
@@ -27,9 +28,9 @@ class p16(Scene):
         self.add_foreground_mobject(ant.mob)
 
         mp = portal_map(portals)
-        for p in portals:
-            s1.add(p.mob)
-            self.play(FadeIn(p.mob))
+        self.play( *[FadeIn(p.mob) for p in portals] )
+        s1.add( *[p.mob for p in portals] )
+
 
         s2 = s1.copy().scale(0.8).shift(3*UP)
         self.play( Transform(s1, s2) )
@@ -39,29 +40,98 @@ class p16(Scene):
         S.label = Mono("S = ").center().to_edge(LEFT).shift(1.2*DOWN)
         self.play( *[Write(o.label) for o in (X,Y,S) ] )
 
+
         for o in [X,Y,S]:
             o.mob.next_to(o.label, RIGHT)
 
         self.play( *[Create(o.mob) for o in (X,Y,S) ] )
 
-        # TODO: after entrance becomes coupled with the dot and stuff, adjust
+        xidx, yidx = {}, {}
+        for i in range(10):
+            if i not in mp: continue
+            pobj = mp[i][0]
+            if len(pobj) > 1:
+                pobj = pobj[0]
+                d = Dot(point=pobj.get_center())
+                j = len(xidx)
+                idx = Tex(f"X[{j}]", font_size=30).next_to(d, 2*UP)
+                xidx[j] = idx
+            else:
+                pobj = pobj[0]
+                d = Dot(point=pobj.get_center())
+                for j in range(N):
+                    if Y.og[j] == i: break
+                idx = Tex(f"Y[{j}]", font_size=30).next_to(d, 2*UP)
+                yidx[j] = idx
+
+
         for A in [X,Y,S]:
             for i in range(N):
                 # portal object : {entrance, exit}
                 pobj = mp[ A.og[i] ] if A != S else mp[ X.og[i] ]
-                high = A[i].anim_highlight(LIGHT_BROWN, rate_func=there_and_back_with_pause)
-                indi = Indicate(pobj, scale_factor=1.75)
-                self.play( indi, high )
+                high = A[i].anim_highlight(LIGHT_BROWN, rate_func=flash)
+                f = lambda o : ScaleInPlace(o, scale_factor=1.75, rate_func=flash)
+                indi = [ *map(f, pobj[0]) ]
+                self.play( *indi, high )
 
         self.wait(3)
 
         dp = Array( ['?'] * N )
-        dp.mob.to_edge(RIGHT)
+        dp.mob.to_edge( RIGHT )
         dp.label = Mono("dp = ").next_to(dp.mob, LEFT)
         self.play( Write(dp.label), Create(dp.mob) )
 
+
+        #############
+        ## BEAT 17 ##
+        #############
+
+        # for the sake of computing dp, we can pretend that all of the portals are open.
+        # this will help us better visualize it.
+        anim = []
+        for i in [3,7]:
+            _, pobj = mp[i]
+            anim += [pobj.toggle()]
+        self.play( *anim )
+
+
+
+        fade = []
+        for o in [X,Y,S]:
+            fade += [o.mob, o.label]
+
+        dpv = VGroup( dp.mob, dp.label )
+        target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
+        self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
+
+        n_steps = [2,4,6,int(1e9)]
+        for i,s in enumerate(n_steps):
+            if i == 0: t = None
+            t = simulate(self, ant, portals, ax, indi=False, steps=s, start_pos=ant.props.pos, t=t)
+            self.wait(1)
+            portal_arcs(self, [portals[i]])
+            self.play( Peek(xidx[i]), Peek(yidx[i]) )
+
+        # simulate(self, ant, portals, ax, indi=False, steps=2)
+        # self.wait(1)
+        # portal_arcs(self, [portals[0]])
+        # self.play( Peek(xidx[0]), Peek(yidx[0]) )
+        #
+        # simulate(self, ant, portals, ax, indi=False, steps=3, start_pos=ant.props.pos)
+        # self.wait(1)
+        # portal_arcs(self, [portals[1]])
+        # self.play( Peek(xidx[1]), Peek(yidx[1]) )
+        #
+        # simulate(self, ant, portals, ax, indi=False, steps=3, start_pos=ant.props.pos)
+        # self.wait(1)
+        # portal_arcs(self, [portals[2]])
+        # self.play( Peek(xidx[1]), Peek(yidx[1]) )
+
+
+
+        # the return trip time for
+
+
+
         self.wait(3)
 
-class p17(Scene):
-    def construct(self):
-        pass

@@ -289,8 +289,8 @@ def hp(portals, run_time=1):
 def portal_map(portals):
     res = {}
     for p in portals:
-        res[p.props.x] = p.mobs.entrance
-        res[p.props.y] = p.mobs.exit
+        res[p.props.x] = [p.mobs.entrance, p.mobs.opening, p.mobs.circ, p.mobs.line], p
+        res[p.props.y] = [p.mobs.exit], p
     return res
 
 def reset_portals(portals, coords):

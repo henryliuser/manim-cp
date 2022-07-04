@@ -1,20 +1,20 @@
 manimCp
 14-day video timeline:
 
-days 1-3:  (6 hrs)
+days 1-3:  (2x6 hrs)
 	scripting
 	storyboarding
 	get feedback
 
-days 5-8:  (10 hrs)
+days 4-9:  (2x16 hrs)
 	program scenes
 	get feedback
 
-days 9-12:  (8 hrs)
+days 10-12:  (2x6 hrs)
 	record voice-over
 	edit / stitch scenes together, ost, etc
 
-days 13-14:  (4 hrs)
+days 13-14:  (2x4 hrs)
 	get feedback
 	final tweaks
 	upload
@@ -23,9 +23,15 @@ days 13-14:  (4 hrs)
 Need OST - 
 	- “communication”
 		- https://www.apmmusic.com/albums/KAR-1033
-	- “determination”,  “determination light”,  “human approach light”
+	- “determination”,  “determination light”,  “human approach light”, "solution"
 		- https://www.apmmusic.com/albums/KOS-0482/KOS_KOS_0482_00201
 	- “beneath the canopy”
 		- https://www.apmmusic.com/albums/2FM_2FM_0070
-	- “cassiopeia”
+	- “cassiopeia”, "hippo", "explore and discover"
 		- https://www.apmmusic.com/albums/KPM_KPM_2233
+    - "serene mallets", "quiet mallets", "strange mallets",
+        - https://www.apmmusic.com/albums/AXS_AXS_2453
+    - "choices", "mistrust", "reasoning"
+        - https://www.apmmusic.com/albums/VOY_VOY_0020
+    - "pushing boundaries", "break the news", "form and function", "hive of industry"
+        - https://www.apmmusic.com/albums/PMY_PMY_0054
