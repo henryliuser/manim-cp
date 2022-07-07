@@ -35,6 +35,7 @@ class p13(Scene):
         self.play(*t.light())
         self.play(*t.fade())
 
+
         simulate(self, ant, portals, ax, run_time=.5, indi=False,
                  t=-1, steps=2, start_pos=-1)
 

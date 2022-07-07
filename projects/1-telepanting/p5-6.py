@@ -4,7 +4,7 @@ from common import *
 from random import randint
 
 
-class p3(Scene):
+class p5(Scene):
     def construct(self):
         # Beat 5: [Expand to large road, ant slowly progressing]
         size = 100

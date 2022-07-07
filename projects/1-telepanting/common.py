@@ -1,7 +1,6 @@
 from manim import *
 from core import *
 from random import random
-
 # class Portal(ABWComponent):
 #     rainbow = [RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
 #     DDR = DEFAULT_DOT_RADIUS * 2
@@ -38,6 +37,7 @@ class Portal(ABWComponent):
             "ax": None,
             "open": True,
             "color": Portal.rainbow[Portal.i],
+            "label": ''
         }
         my = self.props = Namespace(props, kwargs)
         r = Portal.DDR if my.open else 0.0001 * Portal.DDR
@@ -54,6 +54,8 @@ class Portal(ABWComponent):
         top = m.circ.point_at_angle(PI/4)
         bottom = m.circ.point_at_angle(PI/4 + PI)
         m.line.put_start_and_end_on(top, bottom)
+        if my.label:
+            self.add_label(my.label)
         if self.props.color == Portal.rainbow[Portal.i]:
             Portal.i = (Portal.i + 1) % len(Portal.rainbow)
 
@@ -103,6 +105,12 @@ class Portal(ABWComponent):
     def fade_arrow(self):
         return FadeOut(self.mobs.arrow)
 
+    def add_label(self, label):
+        m = self.mobs
+        m.label = Tex(label, font_size=30)
+        m.label.move_to(m.entrance)
+        m.label.shift(UP*.45)
+        self.mob.add(m.label)
 
 class Ant(ABWComponent):
     def __init__(self, **kwargs):
@@ -179,7 +187,9 @@ class Timer(ABWComponent):
         a.next_to(m.text)
         r = [FadeOut(m.val, run_time=run_time, rate_func=rate_func),
              FadeIn(a, run_time=run_time, rate_func=rate_func)]
+        # self.mob.remove(m.val)
         m.val = a
+        # self.mob.add(m.val)
         return r
 
     def light(self, run_time=1):
@@ -299,3 +309,36 @@ def reset_portals(portals, coords):
         if bool(p.props.open) != bool(c[2]):
             a.append(p.toggle())
     return a
+
+def return_trip(scene, ant, portals, ax):
+    x = ant.props.pos
+    d = portal_map(portals)
+    z = d[x][0][0]
+    t = Timer(label='$t_r = $')
+    t.mob.move_to(z)
+    t.mob.shift(DOWN * .7)
+    t.mob.shift(LEFT*.04)
+    scene.play(FadeIn(t.mob))
+
+    ant.props.pos = d[x][1].props.y
+
+    # m = d[x][1].mobs
+    # a = DashedLine(m.entrance, m.exit, color=PURE_RED)
+    a = TracedPath(ant.mob.get_center,
+                   stroke_color=PURE_RED, z_index=-2,
+                   stroke_width=3)
+    scene.add(a)
+    scene.play(ant.anim_pos(),d[x][1].toggle())
+    b = TracedPath(ant.mob.get_center,
+                   stroke_color=BLUE, z_index=-1,
+                   stroke_width=3)
+    scene.add(b)
+
+    while ant.props.pos != x:
+        simulate(scene, ant, portals, ax, run_time=.5, indi=False,
+                 t=t, steps=1, start_pos=-1)
+
+    t.mobs.val.generate_target()
+    t.mobs.val.target.move_to(z).shift(UP * .45)
+    t.mobs.val.target.scale(.5)
+    scene.play(MoveToTarget(t.mobs.val), FadeOut(t.mobs.text))
