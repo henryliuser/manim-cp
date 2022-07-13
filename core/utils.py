@@ -87,6 +87,14 @@ def height(mob : Mobject):
 def intersectingArea(A,B,C,D,E,F,G,H):
     return max(min(C,G)-max(A,E), 0)*max(min(D,H)-max(B,F), 0)
 
+# use dbug() the same way you'd use print
+class DEBUG(Exception): pass
+def dbug(*args, **kwargs):
+    res = map(repr, args)
+    sep = kwargs.pop('sep', ', ')
+    end = kwargs.pop('end', '\n')
+    raise DEBUG(sep.join(res) + end)
+
 class CodeBlock(Code):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -114,3 +122,4 @@ class CodeBlock(Code):
 
     def __getitem__(self, i):
         return self.lines[i]
+

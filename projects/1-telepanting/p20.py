@@ -28,7 +28,7 @@ class p20(Scene):
         idx = Tex('i')
         queries = [6, 4, 15, 32, 7]
         for x in queries:
-            RT = 0.1
+            RT = 0.15
             anim = [ A[i].anim_highlight(GRAY) for i in range(N) ]
             self.play( *anim, run_time=RT )
 
@@ -123,4 +123,3 @@ class p20(Scene):
         self.play( FadeOut(legend), FadeOut(A.mob), FadeOut(q), run_time=0.3 )
 
         self.wait(3)
-
