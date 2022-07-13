@@ -4,7 +4,6 @@ from core import *
 
 
 # TODO: add indices
-
 class PSumDemo(Scene):
     def construct(self):
         # prefix sums are a technique that allows us to quickly compute the

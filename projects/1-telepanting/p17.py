@@ -1,6 +1,34 @@
+from core import *
 from manim import *
+from common import *
 
-class MovingZoomedSceneAround(ZoomedScene):
+class p17(Scene):
+    def construct(self):
+        ax = NumberLine(
+            x_range=[0, 6],
+            length=10,
+            color=BLUE,
+            include_numbers=False,
+            line_to_number_buff=MED_LARGE_BUFF,
+        )
+        self.bring_to_back(ax)
+
+        ant = Ant(ax=ax, pos=5)
+        P = Portal(x=6, y=0, open=1, ax=ax)
+
+        self.play( Create(ax), FadeIn(P.mob) )
+        self.play( Create(ant.mob) )
+
+
+        # TODO: figure out how to do the starry thing
+        BB = BlackBox(self, height=2, width=6)
+        self.play( GrowFromCenter(BB) )
+
+
+        self.wait(3)
+
+
+class Test(ZoomedScene):
     def __init__(self, **kwargs):
         ZoomedScene.__init__(
             self,
