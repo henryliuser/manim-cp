@@ -68,6 +68,10 @@ class Portal(ABWComponent):
         else:
             return ScaleInPlace(m.opening, 0.0001, run_time=run_time)
 
+    def remove(self, scene : Scene):
+        for m in self.mobs:
+            scene.remove(m)
+
     def show_arc(self, func=None):
         p = self.mobs
         arc = ArcBetweenPoints(start=p.entrance.get_center(),
@@ -296,12 +300,16 @@ def hp(portals, run_time=1):
         a.append(ScaleInPlace(p.mobs.opening, 1.5, rate_func=rf, run_time=run_time))
     return a
 
-def portal_map(portals):
+def portal_map(portals) -> "dict: int -> (mobs, Portal)":
     res = {}
     for p in portals:
         res[p.props.x] = [p.mobs.entrance, p.mobs.opening, p.mobs.circ, p.mobs.line], p
         res[p.props.y] = [p.mobs.exit], p
     return res
+
+def get_element(portals, x) -> "(mobs, Portal)":
+    mp = portal_map(portals)
+    return mp[x]
 
 def reset_portals(portals, coords):
     a = []

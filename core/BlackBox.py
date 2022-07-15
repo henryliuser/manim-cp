@@ -4,7 +4,7 @@ from core import *
 # Pass the scene in, so that we can handle moving to front.
 class BlackBox(Rectangle):
     def __init__(self, scene, outline=WHITE, **kwargs):
-        super().__init__(color=outline, fill_opacity=1, fill_color=BLACK, z_index=500, **kwargs)
+        super().__init__(color=outline, fill_opacity=1, fill_color=BLACK, **kwargs)
         scene.add_foreground_mobject(self)
         scene.bring_to_front(self)
 

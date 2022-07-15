@@ -56,3 +56,12 @@ class MovingZoomedSceneAround(ZoomedScene):
         )
         self.play(frame.animate.to_edge(RIGHT), display.animate.to_edge(DOWN+LEFT))
         self.wait(3)
+
+class Test2(Scene):
+    def construct(self):
+        BB = Rectangle(height=3, width=6, fill_opacity=1, fill_color=BLACK, color=WHITE)
+        self.play( GrowFromCenter(BB) )
+        p = MathTex("penalty_i = \,\,?")
+        self.play( Write(p) )
+
+        self.wait(3)

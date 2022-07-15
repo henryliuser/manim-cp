@@ -19,7 +19,7 @@ class Namespace:
         for k in to_pop:
             kwargs.pop(k)
     def __iter__(self):
-        return self.__dict__.items().__iter__()
+        return self.__dict__.values().__iter__()
 
 
 # class ABWComponent:
@@ -123,3 +123,9 @@ class CodeBlock(Code):
     def __getitem__(self, i):
         return self.lines[i]
 
+def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
+    if    isinstance(group, Scene):   it = group.mobjects
+    elif  isinstance(group, Mobject): it = group.submobjects
+    else: it = iter(group)
+    ok = lambda o : isinstance(o, VMobject) and (o not in exclude)
+    return [o for o in it if ok(o) and pred(o)]
