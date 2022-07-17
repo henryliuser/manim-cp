@@ -2,6 +2,7 @@ from core import *
 from manim import *
 from common import *
 
+# TODO: hide symbol when portals are transparent
 class p17(MovingCameraScene):
     def construct(self):
         ax = NumberLine(
