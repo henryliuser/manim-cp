@@ -9,7 +9,6 @@ class p15(Scene):
         # beat 15: [Count return trip, put cost by entrance,
         # show return trip spanning multiple entrances,
         # smoosh costs in between while using line segments to indicate adding distance]
-        size = 22
         ax = NumberLine(
             x_range=[0, 20],
             length=10,
@@ -39,7 +38,7 @@ class p15(Scene):
         # t.mob.target.scale(.5)
         # self.play(MoveToTarget(t.mob))
         d = portal_map(portals)
-        while ant.props.pos != 8:
+        while ant.props.pos != 12:
             simulate(self, ant, portals, ax, indi=False, run_time=.5,
                      steps=1, t=-1, start_pos=-1)
             x = ant.props.pos

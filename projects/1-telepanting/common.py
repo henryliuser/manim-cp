@@ -216,7 +216,7 @@ class Timer(ABWComponent):
 
 def simulate(scene, ant, portals, ax, t=None,
              indi=True, run_time=.5, steps=1000,
-             start_pos=0, hl = False):
+             start_pos=0, hl = False, t2=None):
     if start_pos != -1:
         ant.props.pos = start_pos
         scene.play(ant.anim_pos())
@@ -229,6 +229,8 @@ def simulate(scene, ant, portals, ax, t=None,
         a = []
         if t != -1:
             a = t.tick(run_time=run_time)
+        if t2 is not None:
+            a.extend(t2.tick(run_time=run_time))
         scene.play(*ant.move(scene, portals,
                              run_time=run_time, hl=hl), *a)
         if indi:
@@ -318,35 +320,53 @@ def reset_portals(portals, coords):
             a.append(p.toggle())
     return a
 
-def return_trip(scene, ant, portals, ax):
+def return_trip(scene : Scene, ant, portals, ax, show=True,
+                rt=.5, t=None, timer_map={}, dist=None):
     x = ant.props.pos
     d = portal_map(portals)
     z = d[x][0][0]
-    t = Timer(label='$t_r = $')
-    t.mob.move_to(z)
-    t.mob.shift(DOWN * .7)
-    t.mob.shift(LEFT*.04)
-    scene.play(FadeIn(t.mob))
+    if show:
+        t = Timer(label='$t_r = $')
+        dist = Timer(label='$dist_i = $')
+        t.mob.move_to(z)
+        t.mob.shift(DOWN * .7)
+        t.mob.shift(LEFT*.04)
+        dist.mob.move_to(t.mob)
+        t.mob.shift(DOWN * .7)
+        scene.play(FadeIn(t.mob), FadeIn(dist.mob))
 
     ant.props.pos = d[x][1].props.y
 
-    # m = d[x][1].mobs
-    # a = DashedLine(m.entrance, m.exit, color=PURE_RED)
-    a = TracedPath(ant.mob.get_center,
-                   stroke_color=PURE_RED, z_index=-2,
-                   stroke_width=3)
-    scene.add(a)
-    scene.play(ant.anim_pos(),d[x][1].toggle())
-    b = TracedPath(ant.mob.get_center,
-                   stroke_color=BLUE, z_index=-1,
-                   stroke_width=3)
-    scene.add(b)
+    if show:
+        a = TracedPath(ant.mob.get_center,
+                       stroke_color=PURE_RED,
+                       stroke_width=3)
+        for p in portals:
+            scene.add_foreground_mobject(p.mob)
+        scene.remove_foreground_mobject(ant.mob)
+        scene.add_foreground_mobject(ant.mob)
+        scene.add(a)
+    scene.play(ant.anim_pos(), d[x][1].toggle(), run_time=rt)
+
+    if show:
+        b = TracedPath(ant.mob.get_center,
+                       stroke_color=BLUE,
+                       stroke_width=3)
+        scene.add(b)
 
     while ant.props.pos != x:
-        simulate(scene, ant, portals, ax, run_time=.5, indi=False,
-                 t=t, steps=1, start_pos=-1)
+        c = ant.props.pos
+        if c in d and d[c][1].props.open and len(d[c][0]) > 1:
+            scene.play(Indicate(timer_map[c], scale_factor=2), run_time=2)
+            return_trip(scene, ant, portals, ax, show=False,
+                        rt=.1, t=t)
+        simulate(scene, ant, portals, ax, run_time=rt, indi=False,
+                 t=t, steps=1, start_pos=-1, t2=dist)
 
-    t.mobs.val.generate_target()
-    t.mobs.val.target.move_to(z).shift(UP * .45)
-    t.mobs.val.target.scale(.5)
-    scene.play(MoveToTarget(t.mobs.val), FadeOut(t.mobs.text))
+    if show:
+        t.mobs.val.generate_target()
+        t.mobs.val.target.move_to(z).shift(UP * .45)
+        t.mobs.val.target.scale(.5)
+        scene.play(MoveToTarget(t.mobs.val), FadeOut(t.mobs.text), *dist.fade())
+        timer_map[x] = t.mobs.val
+    return timer_map
