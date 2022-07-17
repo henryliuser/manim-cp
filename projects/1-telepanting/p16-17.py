@@ -32,7 +32,7 @@ class p16(Scene):
         s1.add( *[p.mob for p in portals] )
 
 
-        s2 = s1.copy().scale(0.8).shift(3*UP)
+        s2 = s1.copy().scale(0.8).shift(2.5*UP)
         self.play( Transform(s1, s2) )
 
         X.label = Mono("X = ").center().to_edge(LEFT).shift(1.2*UP)
@@ -87,14 +87,13 @@ class p16(Scene):
         #############
 
         # for the sake of computing dp, we can pretend that all of the portals are open.
+        # as we've shown, the initial state doesn't end up mattering until the final calculation.
         # this will help us better visualize it.
         anim = []
         for i in [3,7]:
             _, pobj = mp[i]
-            anim += [pobj.toggle()]
+            anim += [ pobj.toggle() ]
         self.play( *anim )
-
-
 
         fade = []
         for o in [X,Y,S]:
@@ -104,34 +103,10 @@ class p16(Scene):
         target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
         self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
 
-        n_steps = [2,4,6,int(1e9)]
-        for i,s in enumerate(n_steps):
-            if i == 0: t = None
-            t = simulate(self, ant, portals, ax, indi=False, steps=s, start_pos=ant.props.pos, t=t)
-            self.wait(1)
-            portal_arcs(self, [portals[i]])
-            self.play( Peek(xidx[i]), Peek(yidx[i]) )
-
-        # simulate(self, ant, portals, ax, indi=False, steps=2)
-        # self.wait(1)
-        # portal_arcs(self, [portals[0]])
-        # self.play( Peek(xidx[0]), Peek(yidx[0]) )
-        #
-        # simulate(self, ant, portals, ax, indi=False, steps=3, start_pos=ant.props.pos)
-        # self.wait(1)
-        # portal_arcs(self, [portals[1]])
-        # self.play( Peek(xidx[1]), Peek(yidx[1]) )
-        #
-        # simulate(self, ant, portals, ax, indi=False, steps=3, start_pos=ant.props.pos)
-        # self.wait(1)
-        # portal_arcs(self, [portals[2]])
-        # self.play( Peek(xidx[1]), Peek(yidx[1]) )
-
-
-
-        # the return trip time for
+        # we know that, regardless of the portal configuration *between*
 
 
 
         self.wait(3)
+
 

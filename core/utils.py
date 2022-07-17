@@ -19,7 +19,7 @@ class Namespace:
         for k in to_pop:
             kwargs.pop(k)
     def __iter__(self):
-        return self.__dict__.items().__iter__()
+        return self.__dict__.values().__iter__()
 
 
 # class ABWComponent:
@@ -87,6 +87,14 @@ def height(mob : Mobject):
 def intersectingArea(A,B,C,D,E,F,G,H):
     return max(min(C,G)-max(A,E), 0)*max(min(D,H)-max(B,F), 0)
 
+# use dbug() the same way you'd use print
+class DEBUG(Exception): pass
+def dbug(*args, **kwargs):
+    res = map(repr, args)
+    sep = kwargs.pop('sep', ', ')
+    end = kwargs.pop('end', '\n')
+    raise DEBUG(sep.join(res) + end)
+
 class CodeBlock(Code):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -114,3 +122,10 @@ class CodeBlock(Code):
 
     def __getitem__(self, i):
         return self.lines[i]
+
+def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
+    if    isinstance(group, Scene):   it = group.mobjects
+    elif  isinstance(group, Mobject): it = group.submobjects
+    else: it = iter(group)
+    ok = lambda o : isinstance(o, VMobject) and (o not in exclude)
+    return [o for o in it if ok(o) and pred(o)]
