@@ -81,6 +81,11 @@ class p16(Scene):
         dp.label = Mono("dp = ").next_to(dp.mob, LEFT)
         self.play( Write(dp.label), Create(dp.mob) )
 
+        self.wait(3)
+
+
+
+        # ignore below for now
 
         #############
         ## BEAT 17 ##
@@ -89,24 +94,18 @@ class p16(Scene):
         # for the sake of computing dp, we can pretend that all of the portals are open.
         # as we've shown, the initial state doesn't end up mattering until the final calculation.
         # this will help us better visualize it.
-        anim = []
-        for i in [3,7]:
-            _, pobj = mp[i]
-            anim += [ pobj.toggle() ]
-        self.play( *anim )
-
-        fade = []
-        for o in [X,Y,S]:
-            fade += [o.mob, o.label]
-
-        dpv = VGroup( dp.mob, dp.label )
-        target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
-        self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
+        # anim = []
+        # for i in [3,7]:
+        #     _, pobj = mp[i]
+        #     anim += [ pobj.toggle() ]
+        # self.play( *anim )
+        #
+        # fade = []
+        # for o in [X,Y,S]:
+        #     fade += [o.mob, o.label]
+        #
+        # dpv = VGroup( dp.mob, dp.label )
+        # target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
+        # self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
 
         # we know that, regardless of the portal configuration *between*
-
-
-
-        self.wait(3)
-
-
