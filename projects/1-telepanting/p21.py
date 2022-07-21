@@ -4,7 +4,7 @@ from core import *
 
 
 # TODO: add indices
-class PSumDemo(Scene):
+class p21(Scene):
     def construct(self):
         # prefix sums are a technique that allows us to quickly compute the
         # sum of any subarray in O(1), or constant time.

@@ -19,7 +19,7 @@ class p1(Scene):
         self.play(Create(ant.mob))
         self.add_foreground_mobject(ant.mob)
 
-        t = simulate(self, ant, [], ax)
+        t = simulate(self, ant, [], ax, indi=False)
         self.wait(1)
         self.play(*t.fade())
         # self.play(*t.reset(ant))
@@ -34,12 +34,13 @@ class p1(Scene):
                    color=TEAL, entrance_label='Open')
         p.mob.shift(UP*1.7)
         lStart = Tex('.', color=BLACK).move_to(p.mobs.entrance).shift(UP*.7)
+
         lOpen = Tex('Open', font_size=30).move_to(lStart)
         lClosed = Tex('Closed', font_size=30).move_to(lStart)
         s = 2.2
-        l = VGroup(p.mobs.entrance, p.mobs.opening)
+        l = VGroup(p.mobs.entrance, p.mobs.opening, p.mobs.circ, p.mobs.line)
         l.scale(s)
-        self.play(FadeIn(p.mobs.entrance, p.mobs.opening))
+        self.play(FadeIn(l))
         self.play(Transform(lStart, lOpen), p.toggle())
         self.wait(1)
         self.play(Transform(lStart, lClosed), p.toggle())
@@ -49,5 +50,5 @@ class p1(Scene):
         portal_arcs(self, portals)
 
         # Beat 3: [Show ant progressing through a case]
-        simulate(self, ant, portals, ax)
+        simulate(self, ant, portals, ax, indi=False)
         self.wait(1)

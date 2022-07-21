@@ -1,47 +1,112 @@
 from core import *
 from manim import *
 from common import *
-from random import randint, choice
 
-
+# Add sample case (first line, then ant, then portals, then states, then show progression)
 class p15(Scene):
     def construct(self):
-        # beat 15: [Count return trip, put cost by entrance,
-        # show return trip spanning multiple entrances,
-        # smoosh costs in between while using line segments to indicate adding distance]
         ax = NumberLine(
-            x_range=[0, 20],
+            x_range=[0, 9],
             length=10,
             color=BLUE,
-            z_index=-3,
-            stroke_width=3
+            include_numbers=True,
+            line_to_number_buff=MED_LARGE_BUFF,
         )
+
+        N = 4
         ant = Ant(ax=ax)
-        coords = [(7, 3, 1), (10, 2, 1), (13, 8, 1), (15, 12, 1), (19, 5, 1)]
+        X = Array( [3, 6, 7, 8] )
+        Y = Array( [2, 5, 4, 1] )
+        S = Array( [0, 1, 0, 1] )
+
+        s1 = VGroup(ant.mob, ax)
+        coords = [ *zip(X.og,Y.og,S.og) ]
         portals = createPortals(coords, ax)
-        self.play(FadeIn(ax))
+
+        self.play(Create(ax))
         self.play(Create(ant.mob))
         self.add_foreground_mobject(ant.mob)
-        self.play(*[FadeIn(p.mob) for p in portals])
-        portal_arcs(self, portals)
-        # simulate(self, ant, portals, ax, indi=False, run_time=1/60,
-        #          steps=7, t=-1)
 
-        # t = Timer(label='$t_r = $')
-        # t.mob.move_to(portals[0].mobs.entrance)
-        # t.mob.shift(DOWN*.7)
-        # self.play(FadeIn(t.mob))
-        # simulate(self, ant, portals, ax, run_time=.5, indi=False,
-        #          t=t, steps=4, start_pos=-1)
-        # t.mob.generate_target()
-        # t.mob.target.move_to(portals[0].mobs.entrance).shift(UP*.45)
-        # t.mob.target.scale(.5)
-        # self.play(MoveToTarget(t.mob))
-        d = portal_map(portals)
-        while ant.props.pos != 12:
-            simulate(self, ant, portals, ax, indi=False, run_time=.5,
-                     steps=1, t=-1, start_pos=-1)
-            x = ant.props.pos
-            if x in d and d[x][1].props.open and len(d[x][0]) > 1:
-                return_trip(self, ant, portals, ax)
-        self.wait(1)
+        mp = portal_map(portals)
+        self.play( *[FadeIn(p.mob) for p in portals] )
+        s1.add( *[p.mob for p in portals] )
+
+
+        s2 = s1.copy().scale(0.8).shift(2.5*UP)
+        self.play( Transform(s1, s2) )
+
+        X.label = Mono("X = ").center().to_edge(LEFT).shift(1.2*UP)
+        Y.label = Mono("Y = ").center().to_edge(LEFT)
+        S.label = Mono("S = ").center().to_edge(LEFT).shift(1.2*DOWN)
+        self.play( *[Write(o.label) for o in (X,Y,S) ] )
+
+
+        for o in [X,Y,S]:
+            o.mob.next_to(o.label, RIGHT)
+
+        self.play( *[Create(o.mob) for o in (X,Y,S) ] )
+
+        xidx, yidx = {}, {}
+        for i in range(10):
+            if i not in mp: continue
+            pobj = mp[i][0]
+            if len(pobj) > 1:
+                pobj = pobj[0]
+                d = Dot(point=pobj.get_center())
+                j = len(xidx)
+                idx = Tex(f"X[{j}]", font_size=30).next_to(d, 2*UP)
+                xidx[j] = idx
+            else:
+                pobj = pobj[0]
+                d = Dot(point=pobj.get_center())
+                for j in range(N):
+                    if Y.og[j] == i: break
+                idx = Tex(f"Y[{j}]", font_size=30).next_to(d, 2*UP)
+                yidx[j] = idx
+
+
+        for A in [X,Y,S]:
+            for i in range(N):
+                # portal object : {entrance, exit}
+                pobj = mp[ A.og[i] ] if A != S else mp[ X.og[i] ]
+                high = A[i].anim_highlight(LIGHT_BROWN, rate_func=flash)
+                f = lambda o : ScaleInPlace(o, scale_factor=1.75, rate_func=flash)
+                indi = [ *map(f, pobj[0]) ]
+                self.play( *indi, high )
+
+        self.wait(3)
+
+        dp = Array( ['?'] * N )
+        dp.mob.to_edge( RIGHT )
+        dp.label = Mono("dp = ").next_to(dp.mob, LEFT)
+        self.play( Write(dp.label), Create(dp.mob) )
+
+
+        #############
+        ## BEAT 17 ##
+        #############
+
+        # for the sake of computing dp, we can pretend that all of the portals are open.
+        # as we've shown, the initial state doesn't end up mattering until the final calculation.
+        # this will help us better visualize it.
+        anim = []
+        for i in [3,7]:
+            _, pobj = mp[i]
+            anim += [ pobj.toggle() ]
+        self.play( *anim )
+
+        fade = []
+        for o in [X,Y,S]:
+            fade += [o.mob, o.label]
+
+        dpv = VGroup( dp.mob, dp.label )
+        target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
+        self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
+
+        # we know that, regardless of the portal configuration *between*
+
+
+
+        self.wait(3)
+
+

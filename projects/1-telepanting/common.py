@@ -196,10 +196,10 @@ class Timer(ABWComponent):
         # self.mob.add(m.val)
         return r
 
-    def light(self, run_time=1):
+    def light(self, run_time=1, scale_factor=1.5):
         m = self.mobs
-        return [Indicate(m.val, run_time=run_time),
-                Indicate(m.text, run_time=run_time)]
+        return [Indicate(VGroup(m.val, m.text), scale_factor=scale_factor,
+                         run_time=run_time)]
 
     def fade(self):
         m = self.mobs
@@ -215,8 +215,8 @@ class Timer(ABWComponent):
                 m.val.animate.set_value(self.props.t)]
 
 def simulate(scene, ant, portals, ax, t=None,
-             indi=True, run_time=.5, steps=1000,
-             start_pos=0, hl = False, t2=None):
+             indi=False, run_time=.5, steps=1000,
+             start_pos=0, hl = False):
     if start_pos != -1:
         ant.props.pos = start_pos
         scene.play(ant.anim_pos())
@@ -229,8 +229,6 @@ def simulate(scene, ant, portals, ax, t=None,
         a = []
         if t != -1:
             a = t.tick(run_time=run_time)
-        if t2 is not None:
-            a.extend(t2.tick(run_time=run_time))
         scene.play(*ant.move(scene, portals,
                              run_time=run_time, hl=hl), *a)
         if indi:
@@ -321,13 +319,13 @@ def reset_portals(portals, coords):
     return a
 
 def return_trip(scene : Scene, ant, portals, ax, show=True,
-                rt=.5, t=None, timer_map={}, dist=None):
+                rt=.5, t=None, timer_map={}, dist=None, i=[0]):
     x = ant.props.pos
     d = portal_map(portals)
     z = d[x][0][0]
     if show:
-        t = Timer(label='$t_r = $')
-        dist = Timer(label='$dist_i = $')
+        t = Timer(label=f'$cost_{i[0]} = $')
+        dist = Timer(label=f'$dist_{i[0]} = $')
         t.mob.move_to(z)
         t.mob.shift(DOWN * .7)
         t.mob.shift(LEFT*.04)
@@ -357,16 +355,25 @@ def return_trip(scene : Scene, ant, portals, ax, show=True,
     while ant.props.pos != x:
         c = ant.props.pos
         if c in d and d[c][1].props.open and len(d[c][0]) > 1:
-            scene.play(Indicate(timer_map[c], scale_factor=2), run_time=2)
-            return_trip(scene, ant, portals, ax, show=False,
-                        rt=.1, t=t)
+            scene.play(Indicate(timer_map[c][0], scale_factor=2), run_time=2)
+            # if c != 4:
+            #     raise OSError(t.props.label)
+            # return_trip(scene, ant, portals,  glax, show=False,
+            #             rt=.1, t=t)
+            s = timer_map[c][1]
+            simulate(scene, ant, portals, ax, run_time=.1, indi=False,
+                     t=t, steps=s, start_pos=-1)
+
         simulate(scene, ant, portals, ax, run_time=rt, indi=False,
-                 t=t, steps=1, start_pos=-1, t2=dist)
+                 t=dist, steps=1, start_pos=-1)
 
     if show:
-        t.mobs.val.generate_target()
-        t.mobs.val.target.move_to(z).shift(UP * .45)
-        t.mobs.val.target.scale(.5)
-        scene.play(MoveToTarget(t.mobs.val), FadeOut(t.mobs.text), *dist.fade())
-        timer_map[x] = t.mobs.val
+        total = t.props.t + dist.props.t
+        label = Tex(f"$dp_{i[0]} = {total}$")
+        i[0] += 1
+        label.move_to(z).shift(UP*.45)
+        label.scale(.5)
+        a = VGroup(t.mobs.val, dist.mobs.val)
+        scene.play(FadeOut(t.mobs.text), FadeOut(dist.mobs.text), Transform(a, label))
+        timer_map[x] = [a, total]
     return timer_map
