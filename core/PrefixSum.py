@@ -7,7 +7,7 @@ from manim import *
 # TODO: do psum anim with the dp labels
 
 # [l,r] inclusive query bounds, 0-indexed
-def anim_psum_query(scene:Scene, l:int, r:int, A:Array):
+def anim_psum_query1(scene:Scene, l:int, r:int, A:Array):
     lp = A(l).get_center() + 0.6*UP + 0.2*LEFT
     rp = A(r).get_center() + 0.6*UP + 0.2*RIGHT
     arc = ArcBetweenPoints(start=lp, end=rp, angle= -PI/2)
@@ -39,4 +39,7 @@ def anim_psum_query(scene:Scene, l:int, r:int, A:Array):
     anim = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
     scene.play( *anim )
 
-def anim_psum_query():
+
+def anim_psum_query2():
+    pass
+

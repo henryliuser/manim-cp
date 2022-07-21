@@ -1,12 +1,12 @@
 from core import *
 from manim import *
 
-def anim_bisect(self, scene:Scene, x:int, idxName:str, RT=0.3):
-    A = self
-    N = len(self.og)
+def anim_bisect(scene:Scene, A:Array, x:int, idxName:str, RT=0.3, scale_factor=1):
+    N = len(A.og)
     idx = MathTex(idxName)
     ldx, rdx = map(MathTex, 'LR')
     dx = [idx, ldx, rdx]
+    for d in dx: d.font_size=DEFAULT_FONT_SIZE*scale_factor
 
     anim = [ A[i].anim_highlight(GRAY) for i in range(N) ]
     scene.play( *anim )

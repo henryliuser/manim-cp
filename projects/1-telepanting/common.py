@@ -273,13 +273,15 @@ def stagger_arcs(scene, portals, run_time=1, arrow=True):
     a += [Indicate(x.mobs.entrance, run_time=.0001) for x in portals]
     scene.play(*a)
 
-
-
 def createPortals(tuples, ax):
     res = []
     for x, y, o in tuples:
         res.append(Portal(x=x, y=y, open=o, ax=ax))
     return res
+
+def createPortalsFrom(X, Y, S, ax):
+    return createPortals( [*zip(X,Y,S)], ax )
+
 
 #highlight left portals
 def hlp(ant, portals, run_time=1):
