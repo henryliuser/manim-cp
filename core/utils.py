@@ -98,7 +98,7 @@ def dbug(*args, **kwargs):
 class CodeBlock(Code):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.lines = self.code.lines[0]
+        self.lines = [None] + self.code.lines[0]
 
 
     # @return y-coord of the i-th line of code

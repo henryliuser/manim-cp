@@ -4,13 +4,18 @@ from core import *
 
 
 # TODO: add indices
+<<<<<<< HEAD
 class p21(Scene):
+=======
+
+class PSumDemo(Scene):
+>>>>>>> e0bd1843c7d842bea92df069090616dedf8356cd
     def construct(self):
         # prefix sums are a technique that allows us to quickly compute the
         # sum of any subarray in O(1), or constant time.
         # Because it's a general technique, I'll only give a brief summary here.
         title = StyleText("Prefix Sums", bold=1).to_edge(UP)
-        self.play( Flash(title, 0.5) )
+        self.play( Peek(title, 0.5) )
 
         # suppose we had the following integer array A of size N, in this case, 7
         N = 7
@@ -109,7 +114,6 @@ class p21(Scene):
         # we'll add this extra 0 at the beginning for convenience later.
         # at each index, let's store the sum of the entire prefix of the
         # original array A, up to but not including that index. formally,
-        # TODO: useful.
         t = [Mono("ps[0] = 0"), Mono("ps[i] = sum( A[0:i) )")]
 
         PS = Array(ps[1:])
@@ -176,13 +180,14 @@ class p21(Scene):
                 slice = Rectangle(color=RED, fill_opacity=1, fill_color=RED, height=3, width=0.02)
                 mid = midpoint( es[-1].mob.get_center(), eb[l].mob.get_center() )
                 slice.move_to(mid)
-                anim = [ Flash(slice, 1.3) ]
+                anim = [ Peek(slice, 1.3) ]
                 for i in range(l):
                     anim += [ *map(FadeOut, [es[i].mob, eb[i].mob]) ]
                 self.play( *anim )
 
             anim  = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
             self.play( *anim )
+
 
             # lc = A[l].mob.get_center() + 0.6*UP + 0.2*LEFT
             # rc = A[r].mob.get_center() + 0.6*UP + 0.2*RIGHT

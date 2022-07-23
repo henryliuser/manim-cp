@@ -6,3 +6,5 @@ from core.aliases import *
 # Mobjects or ABWComponents
 from core.Array import *
 from core.BlackBox import *
+from core.BinarySearch import *
+from core.PrefixSum import *

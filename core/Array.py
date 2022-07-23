@@ -56,6 +56,18 @@ class Array(ABWComponent):
         super().__init__(my, mobs, kwargs)
         self.mob.center()
 
+    def append(self, x):
+        if isinstance(x, Array.Element):
+            self.og += [x.props.value]
+            return self.props.arr.append(x)
+
+        self.og += [x]
+        e = Array.Element(value=x)
+        self.props.arr += [e]
+
+    def __iadd__(self, x):
+        self.append(x)
+
     def __call__(self, i):  # exposes the i-th Array.Element.mob
         return self.props.arr[i].mob
 
