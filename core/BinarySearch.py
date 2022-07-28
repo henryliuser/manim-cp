@@ -1,22 +1,29 @@
 from core import *
 from manim import *
 
-def anim_bisect(scene:Scene, A:Array, x:int, idxName:str, RT=0.3, scale_factor=1):
+def anim_bisect(scene:Scene, A:Array, x:int, idxName:str, start=-1, end=-1, RT=0.3, scale_factor=1, labs=None, ax=None):
     N = len(A.og)
     idx = MathTex(idxName)
     ldx, rdx = map(MathTex, 'LR')
     dx = [idx, ldx, rdx]
+    if labs: dx += [ lidx := MathTex(idxName) ]
     for d in dx: d.font_size=DEFAULT_FONT_SIZE*scale_factor
 
-    anim = [ A[i].anim_highlight(GRAY) for i in range(N) ]
-    scene.play( *anim )
+    if start == -1: start = 0
+    if   end == -1:   end = N
+    l, r = start, end
+    
+    gray = lambda i : A[i].anim_highlight(GRAY)
+    red  = lambda i : A[i].anim_highlight(RED)
+    anim = [ gray(i) for i in range(start, end) ]
+    if anim: scene.play( *anim )
 
     def found(i, col=GREEN):
         scene.play( Transform(idx, idx.copy().next_to(A(i), UP)), run_time=RT )
         scene.play( A[i].anim_highlight(col), run_time=RT )
         scene.wait(0.5)
 
-    l, r = 0, N
+    
     anim  = [ ldx.next_to(A(0), DOWN) ]
     anim += [ rdx.next_to(A(-1),DOWN) ]
     scene.play( *map(FadeIn, anim), run_time=RT )
@@ -34,8 +41,11 @@ def anim_bisect(scene:Scene, A:Array, x:int, idxName:str, RT=0.3, scale_factor=1
         m = (l+r) >> 1
         if l == 0 and r == N:
             idx.next_to(A(m), UP)
+            if labs: lidx.next_to( labs[m].get_center(), 3.2*DOWN )
             anim = [ FadeIn(idx, run_time=RT) ]
-        else: anim = [ Transform(idx, idx.copy().next_to(A(m), UP), run_time=RT) ]
+        else:
+            anim = [ Transform(idx, idx.copy().next_to(A(m), UP), run_time=RT) ]
+            if labs: anim += [ Transform(lidx, lidx.copy().next_to(labs[m].get_center(), 3.2*DOWN), run_time=RT) ]
         scene.play( *showLR(), *anim, run_time=RT )
 
         # split search space
@@ -45,20 +55,23 @@ def anim_bisect(scene:Scene, A:Array, x:int, idxName:str, RT=0.3, scale_factor=1
         # animate search space
         scene.play( A[m].anim_highlight(YELLOW, rate_func=flash, run_time=2*RT) )
         anim = []
-        for i in range(N):
+        for i in range(start, end):
             if i < l or i > r:
-                anim += [ A[i].anim_highlight(RED) ]
-        scene.play( *anim, run_time=RT )
+                anim += [ red(i) ]
+        if anim: scene.play( *anim, run_time=RT )
     else:
         if l < N and A.og[l] == x:
             found(l)
         elif l < N:
             found(l, BLUE)
         else:
-            scene.play( A[l].anim_highlight(RED), run_time=RT )
+            scene.play( red(l), run_time=RT )
 
     scene.play( *showLR(), run_time=RT )
     scene.wait(0.5)
-    scene.play( *map(FadeOut, dx), run_time=RT )
+    reset = [ A[i].anim_highlight(BLACK) for i in range(N) ]
+    scene.play( *reset, *map(FadeOut, dx), run_time=RT )
+    
+    return l
 
 

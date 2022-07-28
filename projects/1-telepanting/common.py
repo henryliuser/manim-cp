@@ -72,13 +72,14 @@ class Portal(ABWComponent):
         for m in self.mobs:
             scene.remove(m)
 
-    def show_arc(self, func=None):
+    def show_arc(self, func=None, angle=TAU/4, return_mob=False):
         p = self.mobs
         arc = ArcBetweenPoints(start=p.entrance.get_center(),
                                end=p.exit.get_center(),
                                stroke_color=self.props.color,
-                               z_index=-2)
+                               z_index=-2, angle=angle)
         self.mobs.arc = arc
+        if return_mob: return arc
         if func is not None:
             return Create(arc, rate_func=func)
         return Create(arc)
@@ -168,8 +169,8 @@ class Timer(ABWComponent):
         }
         my = self.props = Namespace(props, kwargs)
         mobs = {
-            'text': Tex(my.label),
-            'val': Integer(my.t),
+            'text' : MathTex(my.label),
+            'val'  : Integer(my.t),
         }
         super().__init__(my, mobs, kwargs)
         self.mob.arrange(RIGHT)
@@ -216,7 +217,7 @@ class Timer(ABWComponent):
 
 def simulate(scene, ant, portals, ax, t=None,
              indi=False, run_time=.5, steps=1000,
-             start_pos=0, hl = False):
+             start_pos=0, hl = False, light_sf=1.5):
     if start_pos != -1:
         ant.props.pos = start_pos
         scene.play(ant.anim_pos())
@@ -232,7 +233,7 @@ def simulate(scene, ant, portals, ax, t=None,
         scene.play(*ant.move(scene, portals,
                              run_time=run_time, hl=hl), *a)
         if indi:
-            scene.play(*t.light(.1))
+            scene.play(*t.light(.3, scale_factor=light_sf))
     return t
 
 def portal_arcs(scene, portals, arrow=True):

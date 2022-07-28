@@ -1,31 +1,42 @@
 from core import *
 from manim import *
 
-# TODO: figure out all the moving parts
-# TODO: show ant: have it progress, abstract entire open portals
-# TODO: mark the dp values above the portals
-# TODO: do psum anim with the dp labels
 
 # [l,r] inclusive query bounds, 0-indexed
-def anim_psum_query1(scene:Scene, l:int, r:int, A:Array):
-    lp = A(l).get_center() + 0.6*UP + 0.2*LEFT
-    rp = A(r).get_center() + 0.6*UP + 0.2*RIGHT
-    arc = ArcBetweenPoints(start=lp, end=rp, angle= -PI/2)
-    anim = [
-        A[j].anim_highlight(LIGHT_BROWN,
-          run_time=1.5,
-          rate_func=flash)
-        for j in range(l,r+1)
-    ]
-    scene.play( Create(arc), *anim )
-    scene.play( FadeOut(arc) )
-    eb, mb = A[:r+1]
-    es, ms = A[:l]
-    anim = [ mb.animate.shift(DOWN) ]
-    if es: anim += [ ms.animate.shift(DOWN) ]
+def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
+    if r < l: return
+    cent = kwargs.pop('anim_pos', ORIGIN)
+    SF   = kwargs.pop('scale_factor', 1)
+    arc  = kwargs.pop("show_arc", False)
+    tf   = kwargs.pop("send_to", lambda x : None)
+
+    anim = []
+    if arc:
+        lp = A(l).get_center() + 0.6*UP + 0.2*LEFT
+        rp = A(r).get_center() + 0.6*UP + 0.2*RIGHT
+        arc = ArcBetweenPoints(start=lp, end=rp, angle= -PI/2)
+        anim += [ Create(arc, rate_func=flash) ]
+
+    Y = LIGHT_BROWN
+    val   = lambda X,i   : X[i].props.val
+    light = lambda X,i,c : X[i].anim_highlight(c, run_time=1.5) 
+    bazzz = lambda X,i,c : X[i].anim_highlight(c, run_time=1.5, rate_func=flash)
+
+    anim += [ light(A,j,Y) for j in range(l,r+1) ]
+    scene.play( *anim ) 
+    try: anim  = [ bazzz(PS, r+1, Y), bazzz(PS, l, Y) ]
+    except: return
+    scene.play( *anim ) 
+    anim = [ light(A,j,BLACK) for j in range(l,r+1) ]
     scene.play( *anim )
 
-    # TODO: Transform(PS.Element, Subarray), into the correct place
+    eb, mb = A[:r+1]
+    es, ms = A[:l]
+    
+    anim = [ mb.animate.shift(UP) ]
+    if es: anim += [ ms.animate.shift(2*UP) ]
+    scene.play( *anim )
+
 
     if es:
         slice = Rectangle(color=RED, fill_opacity=1, fill_color=RED, height=3, width=0.02)
