@@ -8,7 +8,7 @@ class Props:
                 self.__dict__[k] = v
 
 class Namespace:
-    def __init__(self, default, kwargs):
+    def __init__(self, kwargs, default={}):
         to_pop = []  # consume the kwargs we use
         for k,v in default.items():
             if k in kwargs:
@@ -22,6 +22,8 @@ class Namespace:
         return self.__dict__.values().__iter__()
 
 
+
+
 # class ABWComponent:
 #     def __init__(self, props, mobs, kwargs):
 #         self.props = Namespace(eval(props.strip()), kwargs)
@@ -33,7 +35,7 @@ class Namespace:
 class ABWComponent:
     def __init__(self, props, mobs, kwargs):
         self.props = props
-        self.mobs = Namespace(mobs, kwargs)
+        self.mobs = Namespace(kwargs, mobs)
         self.mob = VGroup( *self.mobs.__dict__.values() )
 
 class StyleText(MarkupText):
@@ -126,6 +128,6 @@ class CodeBlock(Code):
 def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
     if    isinstance(group, Scene):   it = group.mobjects
     elif  isinstance(group, Mobject): it = group.submobjects
-    else: it = iter(group)
+    else: it = group.__iter__()
     ok = lambda o : isinstance(o, VMobject) and (o not in exclude)
     return [o for o in it if ok(o) and pred(o)]

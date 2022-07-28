@@ -68,7 +68,6 @@ class p24b(Scene):
         DP.mob.scale(SF).move_to(A(0), LEFT).shift(.85*DOWN)
         DP.label = MathTex("dp =").next_to(DP.mob, LEFT)
         DP.mob.add(DP.label)
-        # DP(0).set_opacity(0)
 
         PS = Array( [0] )
         PS.mob.scale(SF).move_to(A(0), LEFT).shift(1.7*DOWN+SF*LEFT)
@@ -93,6 +92,8 @@ class p24b(Scene):
         dist_ul = Line(LEFT,ORIGIN).next_to(math_eq).shift(1/3*DOWN)
         math_pl = MathTex("+").next_to(dist_ul).set_y( dp_i.get_y() )
         cost_ul = Line(LEFT,ORIGIN).next_to(math_pl).shift(1/3*DOWN)
+        dist_lab = MathTex("dist_i").next_to(dist_ul, DOWN)
+        cost_lab = MathTex("cost_i").next_to(cost_ul, DOWN)
         eq = VGroup(dp_i, math_eq, dist_ul, math_pl, cost_ul).next_to(ax, 5*DOWN)
 
         # helpers
