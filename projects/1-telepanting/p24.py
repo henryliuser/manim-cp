@@ -18,7 +18,7 @@ from core.PrefixSum import anim_psum_query1
 # TODO: ant fades, portal fades (fade all but pm[i])
 # TODO: fix 0 shows up before 'ans = '
 
-class p24b(Scene):
+class p24(Scene):
     def construct(self):
         py = CodeBlock(
             code=src_py,
@@ -54,7 +54,6 @@ class p24b(Scene):
         s1a = VGroup( *all_vmobs_in(self, exclude={py}) )
         s1b = s1a.copy().scale(0.75).to_corner(UP+RIGHT, buff=1)
         self.play( Transform(s1a, s1b) )
-        self.play( Create(py) )
 
         SF = 0.6
 
@@ -64,18 +63,17 @@ class p24b(Scene):
         A.mob.add(A.label)
         A.mob.next_to(py, RIGHT, buff=1.5).shift(0.75*DOWN)
 
-        DP = Array( [''] * N )
+        DP = Array( [''] *  N )
         DP.mob.scale(SF).move_to(A(0), LEFT).shift(.85*DOWN)
         DP.label = MathTex("dp =").next_to(DP.mob, LEFT)
         DP.mob.add(DP.label)
-        # DP(0).set_opacity(0)
 
-        PS = Array( [0] )
+        PS = Array( [0] + ['']*N )
         PS.mob.scale(SF).move_to(A(0), LEFT).shift(1.7*DOWN+SF*LEFT)
         PS.label = MathTex("ps =").next_to(PS(0), LEFT)
         PS.mob.add(PS.label)
 
-        self.play( Create(A.mob), Create(PS.mob), Create(DP.mob) )
+        self.play( Create(A.mob), Create(PS.mob), Create(DP.mob), Create(py) )
 
         # solution
         ps = [0]
@@ -86,6 +84,7 @@ class p24b(Scene):
         pm = portal_map(portals)
         ans = Timer(label='ans = ')
         ans.mob.to_corner(UP+LEFT, buff=1).shift(0.75*RIGHT)
+        RT = [1/15, 1/15, 1/30, 1/60, 1/60, 1/60, 1/60]
 
         # math terms
         dp_i = MathTex("dp_i")
@@ -93,7 +92,9 @@ class p24b(Scene):
         dist_ul = Line(LEFT,ORIGIN).next_to(math_eq).shift(1/3*DOWN)
         math_pl = MathTex("+").next_to(dist_ul).set_y( dp_i.get_y() )
         cost_ul = Line(LEFT,ORIGIN).next_to(math_pl).shift(1/3*DOWN)
-        eq = VGroup(dp_i, math_eq, dist_ul, math_pl, cost_ul).next_to(ax, 5*DOWN)
+        dist_lab = MathTex("dist_i").next_to(dist_ul, DOWN)
+        cost_lab = MathTex("cost_i").next_to(cost_ul, DOWN)
+        eq = VGroup(dp_i, math_eq, dist_ul, math_pl, cost_ul, cost_lab, dist_lab).next_to(ax, 3.5*DOWN)
 
         # helpers
         def tf_hold(o):
@@ -103,10 +104,8 @@ class p24b(Scene):
         tf_revert = lambda o : Transform(o, o.state)
         tf_hlight = lambda o : Indicate(o, scale_factor=1.2)
         tf_show   = lambda o : ScaleInPlace(o, 1.5, rate_func=flash)
-        step = lambda rt,ind : simulate(self, ant, portals, ax, indi=ind, run_time=rt,
+        step = lambda rt,ind : simulate(self, ant, portals, ax, indi=ind, run_time=rt/1.2,
                                         steps=1, t=ans, start_pos=-1, light_sf=1.1)
-        xshift = lambda dir : self.play(A.mob.animate.shift(0.5*dir),   
-            run_time=0.3, rate_func=rate_functions.ease_out_sine )
 
         # main
         for pos in range(1, 23):
@@ -122,105 +121,72 @@ class p24b(Scene):
             x,y,s,i = grab(i)
 
             # compute dist
-            pl, pr = map(ax.n2p, [x,y])
-            dist_line = Line(pl, pr, color=RED).scale(1.1)
+            pr, pl = map(ax.n2p, [x,y])
+            dist_line = Rectangle(width=pr[0]-pl[0], height=0.03, color=RED, fill_opacity=1.0, fill_color=RED).move_to(pl, LEFT)
             self.play( tf_hold(py[7]) )
-            self.play( *map(FadeOut, all_vmobs_in(pobjs, exclude={p.mob})), FadeOut(ant.mob) )
+            self.play( *map(FadeOut, all_vmobs_in(pobjs, exclude={p.mob})), FadeOut(ant.mob), *[FadeOut(labs[l]) for l in range(i)] )
             self.add_foreground_mobject(p.mob)
             dist_i = MathTex(f"{x-y}").next_to(math_eq).set_x( dist_ul.get_x() )
-            self.play( Create(dist_line) )
-            self.play( FadeIn(eq) )
+            self.play( Create(dist_line), FadeIn(eq) )
             self.play( Transform(dist_line, dist_i) )
-            self.play( *map(FadeIn, all_vmobs_in(pobjs, exclude={p.mob})), FadeIn(ant.mob) )
-            self.play( tf_revert(py[7]) )
+            self.play( *map(FadeIn, all_vmobs_in(pobjs, exclude={p.mob})), FadeIn(ant.mob), tf_revert(py[7]), *[FadeIn(labs[l]) for l in range(i)] )
             self.remove_foreground_mobject(p.mob)
             self.add_foreground_mobject(ant.mob)
 
             # binary search
-            self.play( tf_hold(py[8]) )  # highlight `bisect`
-            xshift(UP)
+            self.play(  tf_hold(py[8]),  A.mob.animate.shift(0.5*UP),   run_time=0.3, rate_func=rate_functions.ease_out_sine )  # highlight `bisect`
             j = anim_bisect(self, A, y, 'j', start=0, end=i, RT=0.12, scale_factor=0.65, labs=labs)
-            xshift(DOWN)
-            self.play ( tf_revert(py[8]) )  # unhighlight
+            self.play( tf_revert(py[8]), A.mob.animate.shift(0.5*DOWN), run_time=0.3, rate_func=rate_functions.ease_out_sine )  # highlight `bisect`
 
-            # TODO: prefix sum
-            self.play( tf_hold(py[9]) )
+            # prefix sum
             left  = pex[0].get_center() + 1/5 * LEFT
             right = ent[0].get_center() + 1/5 * RIGHT
-            rect  = Rectangle(width=right[0]-left[0]+0.05, height=1.4, fill_opacity=0.3, fill_color=PINK, color=RED)
+            rect  = Rectangle(width=right[0]-left[0]+0.03, height=1.4, fill_opacity=0.3, fill_color=PINK, color=RED)
             rect.move_to( VGroup(pex[0], ent[0]).get_center() )
-            self.play( DrawBorderThenFill(rect, run_time=1.3) )
+            self.play( tf_hold(py[9]), DrawBorderThenFill(rect, run_time=0.7) )
             cost = ps[i-1] - ps[j]
             cost_i = MathTex( str(cost) ).next_to(math_pl).set_x( cost_ul.get_x() )
 
-            # lcpy = [l.copy().center() for l in labs[j:i-1]]
-            # if not lcpy: lcpy = [ MathTex('0', font_size=36) ]
-            # vgl = VGroup(*lcpy).arrange(RIGHT, buff=0.25).next_to(ax, 2*DOWN)
-            # self.play( Transform(rect, vgl) )
-            anim_psum_query1(self, i-1, j, DP, PS)
-                # anim_pos=ax.get_center()+3*DOWN, 
-                # scale_factor=SF
-            # )
+            anim_psum_query1(self, j, i-2, DP, PS)
 
             self.play( FadeOut(rect) )
-            self.play( tf_revert(py[9]) )
 
             # update 
             dpi = cost + x - y
             dp_lab = MathTex(str(dpi), font_size=36).move_to(lab)
             self.play( Transform(lab, dp_lab), Transform(labc, cost_i) )
+            self.play( tf_revert(py[9]), tf_hold(py[10]) )
             eqc = eq.copy().move_to(eq).add(labc, dist_line)
-            dpi_eq  = MathTex(f"dp_i = {dpi}")
-            dpi_fin = MathTex(f"{dpi}")
-            self.play( Transform(eqc, dpi_eq) )
+            dpi_eq  = MathTex(f"dp_i = {dpi}").move_to(eqc)
+            dpi_fin = MathTex(f"{dpi}").move_to(eqc)
+            self.remove(eq)
+            self.play( Transform(eqc,  dpi_eq) )
+            self.wait(0.3)
             self.play( Transform(eqc, dpi_fin) )
+            self.wait(0.3)
+            self.remove(DP[i-1].mobs.tex, PS[i].mobs.tex)
             DP[i-1].mobs.tex = dpi_fin.copy().move_to(DP(i-1)).scale(SF)
-            PS.append(dpi + ps[-1])
-            PS(-1).scale(SF).next_to( PS(-2), buff=0 )
-            self.play( eqc.animate.move_to(DP(i-1)))
-            vg = VGroup(DP[i-1].mobs.tex, PS(-1))
-            self.play( Transform(eqc, vg), FadeOut(eq) )
-            ps += [dpi]
+            PS[i].mobs.tex = MathTex(f"{dpi+ps[-1]}").move_to(PS(i)).scale(SF)
+            DP[i-1].mob.add( DP[i-1].mobs.tex )
+            PS[i].mob.add( PS[i].mobs.tex )
+            PS[i].props.val = dpi + ps[-1]
+            self.play( Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex)) )
+            self.add( DP[i-1].mobs.tex, PS[i].mobs.tex )
+            self.remove(eqc)
+            self.play( tf_revert(py[10]) )
+            ps += [dpi + ps[-1]]
 
-            step(1/5, True)    # enter portal
-            step(1/15, False)  # tp back
-            while ant.props.pos != pos:  # sim until about to enter again
-                to_enter = (ant.props.pos == pos-1)
-                _rt = 1/5 if to_enter else 1/15
-                step(_rt, to_enter)
-            if i == 3: break
+            step(1/5, True)  # enter portal
+            if s:
+                step(1/15, False)
+                while ant.props.pos < pos:
+                    to_enter = (ant.props.pos == pos-1)
+                    _rt = 1/5 if to_enter else RT[i-1]
+                    step(_rt, to_enter)
+
+            if i == 2: break
 
         self.wait(3)
-
-        # for pos in range(1, 23):
-        #     if pos == 1:
-        #         t = simulate(self, ant, portals, ax, indi=True, run_time=.5, steps=1, start_pos=-1)
-        #     else: simulate(self, ant, portals, ax, indi=True, run_time=.5, steps=1, start_pos=-1, t=t)
-        #     if pos not in X:
-        #         while ant.props.pos != pos:
-        #             simulate(self, ant, portals, ax, indi=False, run_time=0.01,
-        #              steps=1, t=t, start_pos=-1)
-        #         continue
-        #     x,y,s = X[i], Y[i], S[i]
-        #     i += 1
-        #     p = pm[x][1]
-        #     pmobs = pm[x][0] + pm[y][0]
-        #     self.bring_to_front(*pmobs)
-        #     self.play( *map(tf_show, pmobs) )
-        #     anim_bisect(self, A, y, 'j', RT=0.15, scale_factor=0.75)
-        #     arc = p.show_arc(angle=-TAU/4, return_mob=True)
-        #     self.play( Create(arc) )
-        #     dist = MathTex(f"{x-y}").shift(UP+RIGHT)
-        #     self.play( Transform(arc,dist) )
-        #     self.play( Unwrite(arc) )
-        #     # show dist line, transform into dist_i val
-        #     # slice dp_labels and show psum anim, transform into cost_i val
-        #     # merge Transform dist_i, cost_i, into new ps val
-        #     # play/hold/revert the right lines of py
-        #     # change src_py to reflect ps.append()
-        #     # change src_py to reflect `cost`
-        #
-        # self.wait(3)
 
 
 src_py = """
@@ -234,7 +200,7 @@ def solve(N, X, Y, S):
         j = bisect(X, Y[i])
         cost = ps[i] - ps[j]  
         dp_i = cost + dist
-        ps.append( ps[i] + dp_i )
+        ps[i+1] = ps[i] + dp_i
         ans += S[i] * dp_i
         
     end = X[-1] + 1

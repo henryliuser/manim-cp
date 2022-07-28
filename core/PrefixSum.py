@@ -1,11 +1,12 @@
 from core import *
 from manim import *
 
-
+db = 0
 # [l,r] inclusive query bounds, 0-indexed
 def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
+    global db
     if r < l: return
-    cent = kwargs.pop('anim_pos', ORIGIN)
+    top  = kwargs.pop('anim_pos', UP)
     SF   = kwargs.pop('scale_factor', 1)
     arc  = kwargs.pop("show_arc", False)
     tf   = kwargs.pop("send_to", lambda x : None)
@@ -24,8 +25,7 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
 
     anim += [ light(A,j,Y) for j in range(l,r+1) ]
     scene.play( *anim ) 
-    try: anim  = [ bazzz(PS, r+1, Y), bazzz(PS, l, Y) ]
-    except: return
+    anim  = [ bazzz(PS, r+1, Y), bazzz(PS, l, Y) ]
     scene.play( *anim ) 
     anim = [ light(A,j,BLACK) for j in range(l,r+1) ]
     scene.play( *anim )
@@ -33,7 +33,8 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
     eb, mb = A[:r+1]
     es, ms = A[:l]
     
-    anim = [ mb.animate.shift(UP) ]
+
+    anim = [ mb.animate.shift(3*UP) ]
     if es: anim += [ ms.animate.shift(2*UP) ]
     scene.play( *anim )
 
@@ -47,7 +48,9 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
             anim += [ *map(FadeOut, [es[i].mob, eb[i].mob]) ]
         scene.play( *anim )
 
-    anim = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
+    anim  = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
+    anim += [ light(PS,i,BLACK) for i in range(len(PS.props.arr)) ]
+    anim += [ light(A, i,BLACK) for i in range(len(A.props.arr))  ]
     scene.play( *anim )
 
 

@@ -8,3 +8,6 @@ from core.Array import *
 from core.BlackBox import *
 from core.BinarySearch import *
 from core.PrefixSum import *
+
+# no.
+import core.cursed as cursed
