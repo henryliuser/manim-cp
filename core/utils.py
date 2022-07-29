@@ -8,7 +8,7 @@ class Props:
                 self.__dict__[k] = v
 
 class Namespace:
-    def __init__(self, default, kwargs):
+    def __init__(self, kwargs, default={}):
         to_pop = []  # consume the kwargs we use
         for k,v in default.items():
             if k in kwargs:
@@ -35,7 +35,7 @@ class Namespace:
 class ABWComponent:
     def __init__(self, props, mobs, kwargs):
         self.props = props
-        self.mobs = Namespace(mobs, kwargs)
+        self.mobs = Namespace(kwargs, mobs)
         self.mob = VGroup( *self.mobs.__dict__.values() )
 
 class StyleText(MarkupText):

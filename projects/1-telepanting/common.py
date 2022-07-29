@@ -39,7 +39,7 @@ class Portal(ABWComponent):
             "color": Portal.rainbow[Portal.i],
             "label": ''
         }
-        my = self.props = Namespace(props, kwargs)
+        my = self.props = Namespace(kwargs, props)
         r = Portal.DDR if my.open else 0.0001 * Portal.DDR
         mobs = {
             'entrance': Dot(radius=1.5 * Portal.DDR, point=my.ax.n2p(my.x), color=my.color),
@@ -124,7 +124,7 @@ class Ant(ABWComponent):
             "color": PURE_RED,
             "ax": None
         }
-        my = self.props = Namespace(props, kwargs)
+        my = self.props = Namespace(kwargs, props)
         DDR = DEFAULT_DOT_RADIUS
         mobs = {
             'dot': Dot(my.ax.n2p(my.pos), color=my.color, radius=DDR * 2.2),
@@ -167,7 +167,7 @@ class Timer(ABWComponent):
             't': 0,
             'label': 't = '
         }
-        my = self.props = Namespace(props, kwargs)
+        my = self.props = Namespace(kwargs, props)
         mobs = {
             'text' : MathTex(my.label),
             'val'  : Integer(my.t),
