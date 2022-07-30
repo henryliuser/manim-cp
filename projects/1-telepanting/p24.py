@@ -87,6 +87,7 @@ class p24(Scene):
         RT = [1/15, 1/15, 1/30, 1/60, 1/60, 1/60, 1/60]
 
         # math terms
+        eq_sf = 0.7
         dp_i = MathTex("dp_i")
         math_eq = MathTex("=").next_to(dp_i)
         dist_ul = Line(LEFT,ORIGIN).next_to(math_eq).shift(1/3*DOWN)
@@ -94,7 +95,7 @@ class p24(Scene):
         cost_ul = Line(LEFT,ORIGIN).next_to(math_pl).shift(1/3*DOWN)
         dist_lab = MathTex("dist_i").next_to(dist_ul, DOWN)
         cost_lab = MathTex("cost_i").next_to(cost_ul, DOWN)
-        eq = VGroup(dp_i, math_eq, dist_ul, math_pl, cost_ul, cost_lab, dist_lab).next_to(ax, 3.5*DOWN)
+        eq = VGroup(dp_i, math_eq, dist_ul, math_pl, cost_ul, cost_lab, dist_lab).scale(eq_sf).next_to(ax, 3.5*DOWN)
 
         # helpers
         def tf_hold(o):
@@ -126,7 +127,7 @@ class p24(Scene):
             self.play( tf_hold(py[7]) )
             self.play( *map(FadeOut, all_vmobs_in(pobjs, exclude={p.mob})), FadeOut(ant.mob), *[FadeOut(labs[l]) for l in range(i)] )
             self.add_foreground_mobject(p.mob)
-            dist_i = MathTex(f"{x-y}").next_to(math_eq).set_x( dist_ul.get_x() )
+            dist_i = MathTex(f"{x-y}").scale(eq_sf).next_to(math_eq).set_x( dist_ul.get_x() )
             self.play( Create(dist_line), FadeIn(eq) )
             self.play( Transform(dist_line, dist_i) )
             self.play( *map(FadeIn, all_vmobs_in(pobjs, exclude={p.mob})), FadeIn(ant.mob), tf_revert(py[7]), *[FadeIn(labs[l]) for l in range(i)] )
@@ -135,7 +136,7 @@ class p24(Scene):
 
             # binary search
             self.play(  tf_hold(py[8]),  A.mob.animate.shift(0.5*UP),   run_time=0.3, rate_func=rate_functions.ease_out_sine )  # highlight `bisect`
-            j = anim_bisect(self, A, y, 'j', start=0, end=i, RT=0.12, scale_factor=0.65, labs=labs)
+            j = anim_bisect(self, A, y, 'j', RT=0.12, scale_factor=0.65, labs=labs)
             self.play( tf_revert(py[8]), A.mob.animate.shift(0.5*DOWN), run_time=0.3, rate_func=rate_functions.ease_out_sine )  # highlight `bisect`
 
             # prefix sum
@@ -145,7 +146,7 @@ class p24(Scene):
             rect.move_to( VGroup(pex[0], ent[0]).get_center() )
             self.play( tf_hold(py[9]), DrawBorderThenFill(rect, run_time=0.7) )
             cost = ps[i-1] - ps[j]
-            cost_i = MathTex( str(cost) ).next_to(math_pl).set_x( cost_ul.get_x() )
+            cost_i = MathTex( str(cost) ).scale(eq_sf).next_to(math_pl).set_x( cost_ul.get_x() )
 
             anim_psum_query1(self, j, i-2, DP, PS)
 
@@ -184,7 +185,7 @@ class p24(Scene):
                     _rt = 1/5 if to_enter else RT[i-1]
                     step(_rt, to_enter)
 
-            if i == 2: break
+            if i == 4: break
 
         self.wait(3)
 
