@@ -34,8 +34,8 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
     es, ms = A[:l]
     
 
-    anim = [ mb.animate.shift(3*UP) ]
-    if es: anim += [ ms.animate.shift(2*UP) ]
+    anim = [ mb.animate.shift(2.7*UP) ]
+    if es: anim += [ ms.animate.shift(2.1*UP) ]
     scene.play( *anim )
 
 
