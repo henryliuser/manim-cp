@@ -39,3 +39,7 @@ refactor ABWComponent to use `cursed.namespace`
 tf/revert decorator? 
 SaveState(x, x.animate...)
 Revert(x)
+
+fix combine 
+
+add combine to bash script

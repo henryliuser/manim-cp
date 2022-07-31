@@ -1,11 +1,9 @@
 from core import *
 from manim import *
 
-db = 0
 # [l,r] inclusive query bounds, 0-indexed
 def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
-    global db
-    if r < l: return
+    if r < l: return 
     top  = kwargs.pop('anim_pos', UP)
     SF   = kwargs.pop('scale_factor', 1)
     arc  = kwargs.pop("show_arc", False)
@@ -20,8 +18,8 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
 
     Y = LIGHT_BROWN
     val   = lambda X,i   : X[i].props.val
-    light = lambda X,i,c : X[i].anim_highlight(c, run_time=1.5) 
-    bazzz = lambda X,i,c : X[i].anim_highlight(c, run_time=1.5, rate_func=flash)
+    light = lambda X,i,c : X[i].anim_highlight(c) 
+    bazzz = lambda X,i,c : X[i].anim_highlight(c, rate_func=flash)
 
     anim += [ light(A,j,Y) for j in range(l,r+1) ]
     scene.play( *anim ) 
@@ -38,20 +36,29 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
     if es: anim += [ ms.animate.shift(2.1*UP) ]
     scene.play( *anim )
 
-
+    sig = MathTex("\sum").next_to(eb[l].mob, LEFT)
     if es:
-        slice = Rectangle(color=RED, fill_opacity=1, fill_color=RED, height=3, width=0.02)
+        slice = Rectangle(color=RED, fill_opacity=1, fill_color=RED, height=1.5, width=0.02)
         mid = midpoint( es[-1].mob.get_center(), eb[l].mob.get_center() )
         slice.move_to(mid)
         anim = [ Peek(slice, 1.3) ]
         for i in range(l):
             anim += [ *map(FadeOut, [es[i].mob, eb[i].mob]) ]
         scene.play( *anim )
+    scene.play( FadeIn(sig) )
+    vg1 = VGroup(mb, sig)
+
+    psr = PS(r+1).copy()
+    psl = PS(l).copy()
+    mst = MathTex('-')
+    vg2 = VGroup(psr, mst, psl).arrange(buff=0.2).next_to(mb,buff=2)
 
     anim  = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
     anim += [ light(PS,i,BLACK) for i in range(len(PS.props.arr)) ]
     anim += [ light(A, i,BLACK) for i in range(len(A.props.arr))  ]
-    scene.play( *anim )
+    scene.play( *anim, Transform(vg1, vg2) )
+
+    return vg1
 
 
 def anim_psum_query2():

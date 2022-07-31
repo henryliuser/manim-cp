@@ -18,8 +18,9 @@ from core.PrefixSum import anim_psum_query1
 # TODO: ant fades, portal fades (fade all but pm[i])
 # TODO: fix 0 shows up before 'ans = '
 
-class p24(Scene):
+class p24(Scene):  # TODO: change to ABWScene
     def construct(self):
+        # ABWScene.rt_scale = 1e-5  # adjust me
         py = CodeBlock(
             code=src_py,
             tab_width=4,
@@ -116,10 +117,10 @@ class p24(Scene):
 
             # at this point, we're about to enter a portal
             lab  = labs[i]
-            labc = labs[i].copy()
             ent, p = pm[pos]
             pex = p.mobs.exit
             x,y,s,i = grab(i)
+            if i == 4: ABWScene.rt_scale = 1
 
             # compute dist
             pr, pl = map(ax.n2p, [x,y])
@@ -145,19 +146,21 @@ class p24(Scene):
             rect  = Rectangle(width=right[0]-left[0]+0.03, height=1.4, fill_opacity=0.3, fill_color=PINK, color=RED)
             rect.move_to( VGroup(pex[0], ent[0]).get_center() )
             self.play( tf_hold(py[9]), DrawBorderThenFill(rect, run_time=0.7) )
-            cost = ps[i-1] - ps[j]
+            try:cost = ps[i-1] - ps[j]
+            except:dbug(i,j, ps)
             cost_i = MathTex( str(cost) ).scale(eq_sf).next_to(math_pl).set_x( cost_ul.get_x() )
 
-            anim_psum_query1(self, j, i-2, DP, PS)
+            psm = anim_psum_query1(self, j, i-2, DP, PS)
+            if not psm: psm = MathTex('.', font_size=1).to_edge(RIGHT,buff=2)
 
             self.play( FadeOut(rect) )
 
             # update 
             dpi = cost + x - y
             dp_lab = MathTex(str(dpi), font_size=36).move_to(lab)
-            self.play( Transform(lab, dp_lab), Transform(labc, cost_i) )
+            self.play( Transform(psm, cost_i) )
             self.play( tf_revert(py[9]), tf_hold(py[10]) )
-            eqc = eq.copy().move_to(eq).add(labc, dist_line)
+            eqc = eq.copy().move_to(eq).add(psm, dist_line)
             dpi_eq  = MathTex(f"dp_i = {dpi}").move_to(eqc)
             dpi_fin = MathTex(f"{dpi}").move_to(eqc)
             self.remove(eq)
@@ -171,9 +174,11 @@ class p24(Scene):
             DP[i-1].mob.add( DP[i-1].mobs.tex )
             PS[i].mob.add( PS[i].mobs.tex )
             PS[i].props.val = dpi + ps[-1]
-            self.play( Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex)) )
-            self.add( DP[i-1].mobs.tex, PS[i].mobs.tex )
+            self.remove(lab)
+            self.play( Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab)) )
+            labs[i-1] = dp_lab
             self.remove(eqc)
+            self.add( DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab )
             self.play( tf_revert(py[10]) )
             ps += [dpi + ps[-1]]
 
@@ -184,8 +189,6 @@ class p24(Scene):
                     to_enter = (ant.props.pos == pos-1)
                     _rt = 1/5 if to_enter else RT[i-1]
                     step(_rt, to_enter)
-
-            if i == 4: break
 
         self.wait(3)
 

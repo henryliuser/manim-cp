@@ -8,7 +8,7 @@ class Props:
                 self.__dict__[k] = v
 
 class Namespace:
-    def __init__(self, kwargs, default={}):
+    def __init__(self, default, kwargs):
         to_pop = []  # consume the kwargs we use
         for k,v in default.items():
             if k in kwargs:
@@ -21,8 +21,14 @@ class Namespace:
     def __iter__(self):
         return self.__dict__.values().__iter__()
 
-
-
+class ABWScene(Scene):
+    rt_scale = 1
+    def play(*args, **kwargs):
+        rt  = kwargs.pop("run_time", 1) * ABWScene.rt_scale
+        for anim in args:
+            if hasattr(anim, "run_time"):
+                anim.run_time *= ABWScene.rt_scale
+        Scene.play( *args, run_time=rt, **kwargs)
 
 # class ABWComponent:
 #     def __init__(self, props, mobs, kwargs):
@@ -35,7 +41,7 @@ class Namespace:
 class ABWComponent:
     def __init__(self, props, mobs, kwargs):
         self.props = props
-        self.mobs = Namespace(kwargs, mobs)
+        self.mobs = Namespace(mobs, kwargs)
         self.mob = VGroup( *self.mobs.__dict__.values() )
 
 class StyleText(MarkupText):
