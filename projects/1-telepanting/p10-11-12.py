@@ -24,6 +24,7 @@ class p10(Scene):
         self.add_foreground_mobject(ant.mob)
         for p in port:
             self.play(FadeIn(p.mob))
+        self.wait(3)
 
         # beat 11: [Show ant teleporting back, grow size of open portals or smth]
         coords = [(2, 1, 1), (4, 3, 1), (7, 6, 1), (9, 8, 1), (11, 5, 1)]

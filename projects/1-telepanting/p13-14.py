@@ -23,6 +23,7 @@ class p13(Scene):
         label = Tex('$dp_i$ = return time of portal i')
         label.shift(UP)
         self.play(FadeIn(label, rate_func=there_and_back_with_pause, run_time=1.5))
+        self.wait(3)
 
         simulate(self, ant, portals, ax, run_time=.5, indi=False,
                  t=-1, steps=7)
@@ -35,6 +36,7 @@ class p13(Scene):
         self.play(*t.light())
         self.play(*t.fade())
 
+        self.wait(3)
 
         simulate(self, ant, portals, ax, run_time=.5, indi=False,
                  t=-1, steps=2, start_pos=-1)
@@ -45,5 +47,6 @@ class p13(Scene):
         self.play(FadeIn(t.mob))
         simulate(self, ant, portals, ax, run_time=.5, indi=False,
                  t=t, steps=8, start_pos=-1)
-
+        self.wait(1)
         self.play(*t.light())
+        self.wait(2)

@@ -31,4 +31,4 @@ class p17(Scene):
             x = ant.props.pos
             if x in d and d[x][1].props.open and len(d[x][0]) > 1:
                 return_trip(self, ant, portals, ax)
-        self.wait(1)
+        self.wait(2)

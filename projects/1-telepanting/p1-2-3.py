@@ -23,23 +23,23 @@ class p1(Scene):
         self.wait(1)
         self.play(*t.fade())
         # self.play(*t.reset(ant))
-
+        self.wait(3)
         order = [1, 0, 2]
         for i in order:
             self.play(FadeIn(portals[i].mob), run_time=.3)
-
         # Beat 2: [Blink portals, show ant teleportation and crossing, show toggling]
 
         p = Portal(x=3.5, y=-1000, open=False, ax=ax,
                    color=TEAL, entrance_label='Open')
         p.mob.shift(UP*1.7)
         lStart = Tex('.', color=BLACK).move_to(p.mobs.entrance).shift(UP*.7)
-
         lOpen = Tex('Open', font_size=30).move_to(lStart)
+        self.wait(.5)
         lClosed = Tex('Closed', font_size=30).move_to(lStart)
         s = 2.2
         l = VGroup(p.mobs.entrance, p.mobs.opening, p.mobs.circ, p.mobs.line)
         l.scale(s)
+        self.wait(2)
         self.play(FadeIn(l))
         self.play(Transform(lStart, lOpen), p.toggle())
         self.wait(1)

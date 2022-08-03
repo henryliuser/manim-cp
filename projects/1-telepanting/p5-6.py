@@ -40,7 +40,7 @@ class p5(Scene):
 
         self.play(Create(ax), run_time=.1)
         self.play(*[FadeIn(x) for x in a], run_time=.5)
-
+        self.wait(3)
         self.play(ScaleInPlace(VGroup(*A), 12 / size, run_time=3))
         stagger_arcs(self, portals, arrow=False)
         ant = Ant(ax=ax)
