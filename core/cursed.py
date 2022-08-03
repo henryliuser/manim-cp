@@ -23,17 +23,33 @@ def call_function_get_frame(func, *args, **kwargs):
     sys.settrace(trace)
   return frame, result
 
-def namespace(func):
+class Proxy: 
+  def __iter__(self): return self.step()
+  def __next__(self): return next(self.__it__)
+
+def get_module(func):
   frame, result = call_function_get_frame(func)
   try:
-    module = types.ModuleType(func.__name__)
+    module = Proxy()
     module.__dict__.update(frame.f_locals)
-    module.__iter__ = module.__dict__.values().__iter__
     return module
   finally:
     del frame
 
-@namespace
+def sub_scene(func):
+  module = get_module(func)
+  if not hasattr(module, "step"): 
+    return module
+  module.__it__ = iter(module)
+  module.step = lambda : next(module.__it__)
+  return module
+
+def cluster(func):
+  module = get_module(func)
+  module.__iter__ = module.__dict__.values().__iter__
+  return module
+
+@cluster
 def thing():
   eggs = 'spam'
   class Bar:

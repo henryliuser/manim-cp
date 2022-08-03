@@ -3,7 +3,7 @@ from core import *
 
 class actually_funny(Scene):
     def construct(self):
-        @cursed.namespace
+        @cluster
         def eq():
             x = 5
             vg = VGroup( Rectangle(), Circle() )

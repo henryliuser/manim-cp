@@ -10,4 +10,4 @@ from core.BinarySearch import *
 from core.PrefixSum import *
 
 # no.
-import core.cursed as cursed
+from core.cursed import *

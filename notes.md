@@ -1,27 +1,18 @@
 *1-telepanting:*
 
-X incorrect highlight on 1st psum_anim, index 0
-X (dist) Line still extends past Y[i], just make 
-X highlight src dpi
-X self.remove(eq) -> Transform(eqc, dpi)
-X eqc -> dpi -> ps should happen centered below eq
-X case on S[i]
-X fadeout labels when showing dist
-
-X psum:
-X dp[l..r] inclusive
-X ps[r+1] - ps[r]
-X hold dp[l:r]
-X hold ps[r], ps[l]
-X release dp[l:r]
-X slice dp and send_to
-X just shift up
-
-
+24:
+fix flicker on psr
 squash shit
-show i, so i,j intersect is more apparent
-0 shows up before 'ans = '
+fix spacing on psr-psl
+fix weird linger on psum
+highlight 11, 12
 
+EDIT:
+first 2, walkthru 
++ explanation
+others
+5x on everything except
+binary search and ret anim
 
 NARRATION NOTES:
 -m end vs. ans
@@ -40,6 +31,31 @@ tf/revert decorator?
 SaveState(x, x.animate...)
 Revert(x)
 
-fix combine 
+fix combine
+fix render
 
-add combine to bash script
+make sub_scene's work out of line in classes
+
+or figure out how to defer everything into
+global function `def Correlate():`
+
+add combo to bash script
+add checkpointing
+add Chkpts to bash
+
+figure out if we should
+precompute. I think yes.
+this way we can skip around,
+
+Figure out way to capture
+state of Scene, pickle/marshal everything to file,
+and then load from chkpts
+
+------------
+timeline
+
+post 1-telepanting
+
+deep clean room, do laundry
+
+2 days R&D on chkpts, bash scripts, etc

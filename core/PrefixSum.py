@@ -4,6 +4,7 @@ from manim import *
 # [l,r] inclusive query bounds, 0-indexed
 def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
     if r < l: return 
+    ci   = kwargs.pop("value", 0)
     top  = kwargs.pop('anim_pos', UP)
     SF   = kwargs.pop('scale_factor', 1)
     arc  = kwargs.pop("show_arc", False)
@@ -46,19 +47,26 @@ def anim_psum_query1(scene:Scene, l:int, r:int, A:Array, PS:Array, **kwargs):
             anim += [ *map(FadeOut, [es[i].mob, eb[i].mob]) ]
         scene.play( *anim )
     scene.play( FadeIn(sig) )
-    vg1 = VGroup(mb, sig)
+    try:
+        evg = VGroup( *[eb[j].mob for j in range(l,r+1)] )
+    except:
+        dbug( [eb[j].mob for j in range(l,r+1)] )
+    vg1 = VGroup(evg, sig)
 
-    psr = PS(r+1).copy()
+    psr = PS(r+1).copy().copy()
     psl = PS(l).copy()
-    mst = MathTex('-')
-    vg2 = VGroup(psr, mst, psl).arrange(buff=0.2).next_to(mb,buff=2)
+    mst = MathTex('-').align_to(mb)
+    vg2 = VGroup(psr, mst, psl).arrange(buff=0.2).align_to(mb,LEFT)
+    vg3 = VGroup( PS(r+1).copy(), PS(l).copy() )
 
     anim  = [ FadeOut(eb[i].mob) for i in range(l, r+1) ]
     anim += [ light(PS,i,BLACK) for i in range(len(PS.props.arr)) ]
     anim += [ light(A, i,BLACK) for i in range(len(A.props.arr))  ]
-    scene.play( *anim, Transform(vg1, vg2) )
+    scene.play( *anim, FadeOut(vg1), Transform(vg3, vg2) )
+    scene.remove(sig, evg)  # wtf?
+    scene.play( Transform(vg3, MathTex(f"{ci}")) )
 
-    return vg1
+    return vg3
 
 
 def anim_psum_query2():

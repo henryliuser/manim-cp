@@ -8,3 +8,4 @@ if __name__ == '__main__':
         for b in a:
             f.write(f"file './output/{b}'\n")
     system('ffmpeg -f concat -safe 0 -i concat_names.txt -c copy output.mp4')
+    system('rm -rf output')

@@ -1,22 +1,6 @@
 from manim import *
 from common import *
 from core import *
-from core.PrefixSum import anim_psum_query1
-
-# TODO: make the function grouping shit work
-# TODO: either with function or with context manager, prefer latter
-# TODO: `with Namespace(scene=self) as g1: `
-# TODO: `    A, B, C = ...       `
-# TODO:
-# TODO: `g1.A  |  all_vmobs_in(g1)  |  ...`
-
-# TODO: NAIL IT
-# TODO: position elements
-# TODO: highlight code snippets
-# TODO: psum anim
-# TODO: make clearer the conversion to dp_i then to ps[-1]
-# TODO: ant fades, portal fades (fade all but pm[i])
-# TODO: fix 0 shows up before 'ans = '
 
 class p24(Scene):  # TODO: change to ABWScene
     def construct(self):
@@ -146,11 +130,10 @@ class p24(Scene):  # TODO: change to ABWScene
             rect  = Rectangle(width=right[0]-left[0]+0.03, height=1.4, fill_opacity=0.3, fill_color=PINK, color=RED)
             rect.move_to( VGroup(pex[0], ent[0]).get_center() )
             self.play( tf_hold(py[9]), DrawBorderThenFill(rect, run_time=0.7) )
-            try:cost = ps[i-1] - ps[j]
-            except:dbug(i,j, ps)
+            cost = ps[i-1] - ps[j]
             cost_i = MathTex( str(cost) ).scale(eq_sf).next_to(math_pl).set_x( cost_ul.get_x() )
 
-            psm = anim_psum_query1(self, j, i-2, DP, PS)
+            psm = anim_psum_query1(self, j, i-2, DP, PS, value=cost)
             if not psm: psm = MathTex('.', font_size=1).to_edge(RIGHT,buff=2)
 
             self.play( FadeOut(rect) )
@@ -168,14 +151,17 @@ class p24(Scene):  # TODO: change to ABWScene
             self.wait(0.3)
             self.play( Transform(eqc, dpi_fin) )
             self.wait(0.3)
+            # TODO: make this automatic
             self.remove(DP[i-1].mobs.tex, PS[i].mobs.tex)
+            DP[i-1].mob.remove( DP[i-1].mobs.tex )
+            PS[i].mob.remove( PS[i].mobs.tex )
             DP[i-1].mobs.tex = dpi_fin.copy().move_to(DP(i-1)).scale(SF)
             PS[i].mobs.tex = MathTex(f"{dpi+ps[-1]}").move_to(PS(i)).scale(SF)
             DP[i-1].mob.add( DP[i-1].mobs.tex )
             PS[i].mob.add( PS[i].mobs.tex )
             PS[i].props.val = dpi + ps[-1]
             self.remove(lab)
-            self.play( Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab)) )
+            self.play( tf_hlight(py[11]), Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab)) )
             labs[i-1] = dp_lab
             self.remove(eqc)
             self.add( DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab )
