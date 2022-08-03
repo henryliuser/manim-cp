@@ -21,9 +21,8 @@ class p7(Scene):
         self.add_foreground_mobject(ant.mob)
         for p in portals:
             self.play(FadeIn(p.mob))
-
         portal_arcs(self, portals)
-
+        self.wait(3)
         t = simulate(self, ant, portals, ax, run_time=.5, indi=False)
 
         self.play(*t.fade())

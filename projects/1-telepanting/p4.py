@@ -14,12 +14,11 @@ class p4(Scene):
         ant = Ant(ax=ax)
         coords = [(2, 1, 1), (4, 3, 1)]
         portals = createPortals(coords, ax)
-
         self.play(Create(ax))
         self.play(Create(ant.mob))
         self.add_foreground_mobject(ant.mob)
         for p in portals:
             self.play(FadeIn(p.mob))
-
+        self.wait(2)
         t = simulate(self, ant, portals, ax)
         self.play(*t.fade())

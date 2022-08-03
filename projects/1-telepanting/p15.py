@@ -40,6 +40,8 @@ class p15(Scene):
         S.label = Mono("S = ").center().to_edge(LEFT).shift(1.2*DOWN)
         self.play( *[Write(o.label) for o in (X,Y,S) ] )
 
+        self.wait(3)
+
 
         for o in [X,Y,S]:
             o.mob.next_to(o.label, RIGHT)
