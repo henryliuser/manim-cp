@@ -327,8 +327,8 @@ def return_trip(scene : Scene, ant, portals, ax, show=True,
     d = portal_map(portals)
     z = d[x][0][0]
     if show:
-        t = Timer(label=f'$cost_{i[0]} = $')
-        dist = Timer(label=f'$dist_{i[0]} = $')
+        t = Timer(label=f'cost_{i[0]} = ')
+        dist = Timer(label=f'dist_{i[0]} = ')
         t.mob.move_to(z)
         t.mob.shift(DOWN * .7)
         t.mob.shift(LEFT*.04)
@@ -372,7 +372,7 @@ def return_trip(scene : Scene, ant, portals, ax, show=True,
 
     if show:
         total = t.props.t + dist.props.t
-        label = Tex(f"$dp_{i[0]} = {total}$")
+        label = Tex(f"${total}$")
         i[0] += 1
         label.move_to(z).shift(UP*.45)
         label.scale(.5)

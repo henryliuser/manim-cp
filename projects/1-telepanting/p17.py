@@ -25,7 +25,7 @@ class p17(Scene):
         self.play(*[FadeIn(p.mob) for p in portals])
         portal_arcs(self, portals)
         d = portal_map(portals)
-        while ant.props.pos != 20:
+        while ant.props.pos != 8:
             simulate(self, ant, portals, ax, indi=False, run_time=.5,
                      steps=1, t=-1, start_pos=-1)
             x = ant.props.pos
