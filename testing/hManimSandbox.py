@@ -17,12 +17,12 @@ class actually_funny(Scene):
 
 class opa(Scene):
     def construct(self):
-        DP = Array( [0, 1] + ['?'] * 8 )
-        self.play( Create(DP.mob.to_edge(UP,buff=1.2)) )
-        idx = [Tex(f"${i}$").move_to(DP(i)).shift(UP) for i in range(10)]
-        self.play( *map(Create, idx) )
-        self.play( Create(getBoundingBox(DP(3))))
-        dp = DP.og
+        self.camera.background_color=WHITE
+        i = ImageMobject("pic.png").scale(2)
+        self.play( FadeIn(i) )
+        self.wait()
+        self.play( FadeOut(i) )
+        self.wait()
 
 
 class test(Scene):
