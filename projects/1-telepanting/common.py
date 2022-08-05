@@ -217,7 +217,7 @@ class Timer(ABWComponent):
 
 def simulate(scene, ant, portals, ax, t=None,
              indi=False, run_time=.5, steps=1000,
-             start_pos=0, hl = False, light_sf=1.5):
+             start_pos=0, hl = False, light_sf=1.1):
     if start_pos != -1:
         ant.props.pos = start_pos
         scene.play(ant.anim_pos())

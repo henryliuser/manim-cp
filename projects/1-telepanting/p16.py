@@ -35,9 +35,9 @@ class p16(Scene):
         s2 = s1.copy().scale(0.8).shift(2.5*UP)
         self.play( Transform(s1, s2) )
 
-        X.label = Mono("X = ").center().to_edge(LEFT).shift(1.2*UP)
-        Y.label = Mono("Y = ").center().to_edge(LEFT)
-        S.label = Mono("S = ").center().to_edge(LEFT).shift(1.2*DOWN)
+        X.label = Mono("X = ").center().to_edge(LEFT).shift(0.6*UP)
+        Y.label = Mono("Y = ").center().to_edge(LEFT).shift(0.6*DOWN)
+        S.label = Mono("S = ").center().to_edge(LEFT).shift(1.8*DOWN)
         self.play( *[Write(o.label) for o in (X,Y,S) ] )
 
 
@@ -81,7 +81,7 @@ class p16(Scene):
         dp.label = Mono("dp = ").next_to(dp.mob, LEFT)
         self.play( Write(dp.label), Create(dp.mob) )
 
-        self.wait(3)
+        self.wait()
 
 
 
@@ -94,18 +94,19 @@ class p16(Scene):
         # for the sake of computing dp, we can pretend that all of the portals are open.
         # as we've shown, the initial state doesn't end up mattering until the final calculation.
         # this will help us better visualize it.
-        # anim = []
-        # for i in [3,7]:
-        #     _, pobj = mp[i]
-        #     anim += [ pobj.toggle() ]
-        # self.play( *anim )
-        #
-        # fade = []
-        # for o in [X,Y,S]:
-        #     fade += [o.mob, o.label]
-        #
-        # dpv = VGroup( dp.mob, dp.label )
-        # target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
-        # self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
+        anim = []
+        for i in [3,7]:
+            _, pobj = mp[i]
+            anim += [ pobj.toggle() ]
+        self.play( *anim )
+        
+        fade = []
+        for o in [X,Y,S]:
+            fade += [o.mob, o.label]
+        
+        dpv = VGroup( dp.mob, dp.label )
+        target = dpv.copy().center().to_edge(DOWN).shift(0.5*UP)
+        self.play( dpv.animate.move_to(target), *map(FadeOut, fade) )
+        self.wait()
 
         # we know that, regardless of the portal configuration *between*

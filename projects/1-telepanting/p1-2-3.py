@@ -19,7 +19,7 @@ class p1(Scene):
         self.play(Create(ant.mob))
         self.add_foreground_mobject(ant.mob)
 
-        t = simulate(self, ant, [], ax, indi=False)
+        t = simulate(self, ant, [], ax, indi=True, light_sf=1.1)
         self.wait(1)
         self.play(*t.fade())
         # self.play(*t.reset(ant))
@@ -50,5 +50,5 @@ class p1(Scene):
         portal_arcs(self, portals)
 
         # Beat 3: [Show ant progressing through a case]
-        simulate(self, ant, portals, ax, indi=False)
+        simulate(self, ant, portals, ax, indi=True, light_sf=1.1)
         self.wait(1)

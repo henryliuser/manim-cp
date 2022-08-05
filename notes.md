@@ -1,31 +1,12 @@
-*1-telepanting:*
-
-24:
-fix flicker on psr
-squash shit
-fix spacing on psr-psl
-fix weird linger on psum
-highlight 11, 12
-
-EDIT:
-first 2, walkthru 
-+ explanation
-others
-5x on everything except
-binary search and ret anim
-
-NARRATION NOTES:
--m end vs. ans
--m implicit dp array
--m on j <= i, no ps. this to avoid confusion
-
---------------------------------------------
 *GENERAL:*
+
+cluster variant that returns a vgroup
 
 core.Array
 A.align_to_index(B,i)
+move_as_index(i)  (everything else aligns relative to index)
 
-refactor ABWComponent to use `cursed.namespace`
+refactor ABWComponent to use `cursed.sub_scene` and `cursed.cluster`
 
 tf/revert decorator? 
 SaveState(x, x.animate...)
@@ -35,6 +16,7 @@ fix combine
 fix render
 
 make sub_scene's work out of line in classes
+make sub_scene's use Camera
 
 or figure out how to defer everything into
 global function `def Correlate():`

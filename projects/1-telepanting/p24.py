@@ -88,8 +88,7 @@ class p24(Scene):  # TODO: change to ABWScene
             return Transform(o, o.copy().scale(1.3).set_color(YELLOW))
         grab      = lambda i : (X[i], Y[i], S[i], i+1)
         tf_revert = lambda o : Transform(o, o.state)
-        tf_hlight = lambda o : Indicate(o, scale_factor=1.2)
-        tf_show   = lambda o : ScaleInPlace(o, 1.5, rate_func=flash)
+        tf_hlight = lambda o : Transform(o, o.copy().scale(1.3).set_color(YELLOW), rate_func=flash, run_time=1.8)
         step = lambda rt,ind : simulate(self, ant, portals, ax, indi=ind, run_time=rt/1.2,
                                         steps=1, t=ans, start_pos=-1, light_sf=1.1)
 
@@ -148,9 +147,9 @@ class p24(Scene):  # TODO: change to ABWScene
             dpi_fin = MathTex(f"{dpi}").move_to(eqc)
             self.remove(eq)
             self.play( Transform(eqc,  dpi_eq) )
-            self.wait(0.3)
+            self.wait(0.6)
             self.play( Transform(eqc, dpi_fin) )
-            self.wait(0.3)
+            self.wait(0.6)
             # TODO: make this automatic
             self.remove(DP[i-1].mobs.tex, PS[i].mobs.tex)
             DP[i-1].mob.remove( DP[i-1].mobs.tex )
@@ -161,11 +160,10 @@ class p24(Scene):  # TODO: change to ABWScene
             PS[i].mob.add( PS[i].mobs.tex )
             PS[i].props.val = dpi + ps[-1]
             self.remove(lab)
-            self.play( tf_hlight(py[11]), Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab)) )
+            self.play( tf_hlight(py[11]), tf_revert(py[10]), Transform(eqc, VGroup(DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab)) )
             labs[i-1] = dp_lab
             self.remove(eqc)
             self.add( DP[i-1].mobs.tex, PS[i].mobs.tex, dp_lab )
-            self.play( tf_revert(py[10]) )
             ps += [dpi + ps[-1]]
 
             step(1/5, True)  # enter portal
