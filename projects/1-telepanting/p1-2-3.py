@@ -46,7 +46,6 @@ class p1(Scene):
         self.play(Transform(lStart, lClosed), p.toggle())
         self.wait(1)
         self.play(ShrinkToCenter(VGroup(lStart, l)))
-
         portal_arcs(self, portals)
 
         # Beat 3: [Show ant progressing through a case]

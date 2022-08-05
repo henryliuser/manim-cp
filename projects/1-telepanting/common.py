@@ -373,11 +373,15 @@ def return_trip(scene : Scene, ant, portals, ax, show=True,
 
     if show:
         total = t.props.t + dist.props.t
-        label = Tex(f"${total}$")
+        label = Tex(f"$dp_{i[0]} = {total}$")
+        label2 = Tex(f"${total}$")
         i[0] += 1
         label.move_to(z).shift(UP*.45)
         label.scale(.5)
+        label2.move_to(label)
+        label2.scale(.5)
         a = VGroup(t.mobs.val, dist.mobs.val)
-        scene.play(FadeOut(t.mobs.text), FadeOut(dist.mobs.text), Transform(a, label))
+        scene.play(FadeOut(t.mobs.text), FadeOut(dist.mobs.text), Transform(a, label), run_time=.5)
+        scene.play(Transform(a, label2), run_time=.5)
         timer_map[x] = [a, total]
     return timer_map
