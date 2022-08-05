@@ -165,11 +165,12 @@ class Timer(ABWComponent):
     def __init__(self, **kwargs):
         props = {
             't': 0,
-            'label': 't = '
+            'label': 't = ',
+            'color': WHITE
         }
         my = self.props = Namespace(props, kwargs)
         mobs = {
-            'text' : MathTex(my.label),
+            'text' : MathTex(my.label, color=my.color),
             'val'  : Integer(my.t),
         }
         super().__init__(my, mobs, kwargs)
@@ -327,8 +328,8 @@ def return_trip(scene : Scene, ant, portals, ax, show=True,
     d = portal_map(portals)
     z = d[x][0][0]
     if show:
-        t = Timer(label=f'cost_{i[0]} = ')
-        dist = Timer(label=f'dist_{i[0]} = ')
+        t = Timer(label=f'cost_{i[0]} = ', color=PINK)
+        dist = Timer(label=f'dist_{i[0]} = ', color=YELLOW)
         t.mob.move_to(z)
         t.mob.shift(DOWN * .7)
         t.mob.shift(LEFT*.04)

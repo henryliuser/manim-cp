@@ -78,8 +78,8 @@ class p24(Scene):  # TODO: change to ABWScene
         dist_ul = Line(LEFT,ORIGIN).next_to(math_eq).shift(1/3*DOWN)
         math_pl = MathTex("+").next_to(dist_ul).set_y( dp_i.get_y() )
         cost_ul = Line(LEFT,ORIGIN).next_to(math_pl).shift(1/3*DOWN)
-        dist_lab = MathTex("dist_i").next_to(dist_ul, DOWN)
-        cost_lab = MathTex("cost_i").next_to(cost_ul, DOWN)
+        dist_lab = MathTex("dist_i", color=YELLOW).next_to(dist_ul, DOWN)
+        cost_lab = MathTex("cost_i", color= PINK ).next_to(cost_ul, DOWN)
         eq = VGroup(dp_i, math_eq, dist_ul, math_pl, cost_ul, cost_lab, dist_lab).scale(eq_sf).next_to(ax, 3.5*DOWN)
 
         # helpers

@@ -15,6 +15,14 @@ class actually_funny(Scene):
         self.play( Create(Mono(rf"{eq.x, eq.y, [*all_vmobs_in(eq)]}").to_edge(DOWN)) )
         self.wait()
 
+class opa(Scene):
+    def construct(self):
+        DP = Array( [0, 1] + ['?'] * 8 )
+        self.play( Create(DP.mob.to_edge(UP,buff=1.2)) )
+        idx = [Tex(f"${i}$").move_to(DP(i)).shift(UP) for i in range(10)]
+        self.play( *map(Create, idx) )
+        self.play( Create(getBoundingBox(DP(3))))
+        dp = DP.og
 
 
 class test(Scene):

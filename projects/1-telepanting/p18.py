@@ -46,7 +46,7 @@ class p18(MovingCameraScene):
         # No matter what, it's clear that on the return trip,
         # we will need to at least travel this yellow distance X[i] - Y[i]. Let's call this term dist
         brace = BraceBetweenPoints(ax.n2p(0), ax.n2p(8)).shift(0.5*DOWN)
-        self.play( GrowFromCenter(brace), FadeToColor(ax,color=YELLOW) )
+        self.play( GrowFromCenter(brace), FadeToColor(ax,color=RED) )
         dist = MathTex("dist_i = X_i - Y_i", color=YELLOW).next_to(brace, DOWN)
         self.play( Write(dist, run_time=0.75) )
         self.wait(1.5)
