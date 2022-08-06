@@ -36,8 +36,11 @@ class p16(Scene):
         self.play( Transform(s1, s2) )
 
         X.label = Mono("X = ").center().to_edge(LEFT).shift(0.6*UP)
+        X.rlab = Tex("$X_i$ = entrance position of $i^{th}$ portal", font_size=DEFAULT_FONT_SIZE-5).to_edge(RIGHT).shift(0.6*UP)
         Y.label = Mono("Y = ").center().to_edge(LEFT).shift(0.6*DOWN)
+        Y.rlab = Tex("$Y_i$ = exit position of $i^{th}$ portal", font_size=DEFAULT_FONT_SIZE-5).to_edge(RIGHT).shift(0.6*DOWN)
         S.label = Mono("S = ").center().to_edge(LEFT).shift(1.8*DOWN)
+        S.rlab = Tex("$S_i$ = initial state of $i^{th}$ portal", font_size=DEFAULT_FONT_SIZE-5).to_edge(RIGHT).shift(1.8*DOWN)
         self.play( *[Write(o.label) for o in (X,Y,S) ] )
 
 
@@ -66,6 +69,7 @@ class p16(Scene):
 
 
         for A in [X,Y,S]:
+            self.play( Write(A.rlab), run_time=0.5 )
             for i in range(N):
                 # portal object : {entrance, exit}
                 pobj = mp[ A.og[i] ] if A != S else mp[ X.og[i] ]
@@ -73,6 +77,7 @@ class p16(Scene):
                 f = lambda o : ScaleInPlace(o, scale_factor=1.75, rate_func=flash)
                 indi = [ *map(f, pobj[0]) ]
                 self.play( *indi, high )
+            self.play( Unwrite(A.rlab), run_time=0.5 )
 
         self.wait(3)
 
