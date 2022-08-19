@@ -1,7 +1,6 @@
 # https://stackoverflow.com/questions/4214936/how-can-i-get-the-values-of-the-locals-of-a-function-after-it-has-been-executed
 # author: Niklas R
 import sys, types
-
 def call_function_get_frame(func, *args, **kwargs):
   """
   Calls the function *func* with the specified arguments and keyword

@@ -1,8 +1,9 @@
 from manim import *
 from core import *
 from copy import deepcopy
+from core.utils import *
 
-# all ABW structures will optionally take a scene
+
 class Array(ABWComponent):
     class Element(ABWComponent):
         def __init__(self, **kwargs):
@@ -14,19 +15,27 @@ class Array(ABWComponent):
                 "width"         : 1,
                 "stroke_width"  : 5,
                 "value"         : 0,
+                "scale"         : 1,
             }
             my = self.props = Namespace(props, kwargs)
+            my.height *= my.scale
+            my.width *= my.scale
+            my.stroke_width *= my.scale
+            s = my.height - my.stroke_width / 50
             mobs =  {
                 "fill"   :
-                    Rectangle(height=.98, width=0.98, color=my.cell_color)
+                    Rectangle(height=s, width=s,
+                              color=my.cell_color, stroke_width=my.stroke_width)
                         .set_fill(my.cell_color, opacity=0.7),
 
                 "border" :
                     Rectangle(height=my.height, width=my.width)
                         .set_stroke(BLUE, my.stroke_width, 1),
-
-                "tex"    : Tex(my.value),
             }
+            if isinstance(my.value, int):
+                mobs["tex"] = Tex(my.value).scale(my.scale)
+            else:
+                mobs["val"] = my.value
             super().__init__(my, mobs, kwargs)
 
         def anim_set_val(self, val):
@@ -40,10 +49,12 @@ class Array(ABWComponent):
             self.props.cell_color = col
             return FadeToColor(f, col, **kwargs)
 
-    def __init__(self, A, **kwargs):
+    def __init__(self, A, scale=1, **kwargs):
+        if scale == 0:
+            scale = 6 / len(A)
         props = {
             "N"   : len(A),
-            "arr" : [ Array.Element(value=x) for x in A ],
+            "arr": [Array.Element(value=x, scale=scale) for x in A],
         }
         self.og = A
         my = self.props = Namespace(props, kwargs)

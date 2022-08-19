@@ -36,7 +36,6 @@ class p24(Scene):  # TODO: change to ABWScene
         self.add_foreground_mobject(ant.mob)
         self.play( *[FadeIn(p.mob) for p in portals] )
 
-
         s1a = VGroup( *all_vmobs_in(self, exclude={py}) )
         s1b = s1a.copy().scale(0.75).to_corner(UP+RIGHT, buff=1)
         self.play( Transform(s1a, s1b) )
