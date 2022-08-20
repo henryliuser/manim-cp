@@ -140,3 +140,10 @@ def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
     
     ok = lambda o : o != None and isinstance(o, VMobject) and (o not in exclude)
     return [o for o in it if ok(o) and pred(o)]
+
+def ScaleAndMove(mob, scale_factor, target=None):
+    if target is None:
+        target = mob.target
+    temp_mob = mob.copy()
+    temp_mob.move_to(target).scale(scale_factor)
+    return Transform(mob, temp_mob)

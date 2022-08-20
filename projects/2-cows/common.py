@@ -130,9 +130,12 @@ class HashSet(ABWComponent):
     def put(self, mob, scene, val=None, rt=1):
         my = self.props
         m = self.mobs
+
+        scale_factor = min(1, (3/4 * my.width) / width(mob))
         mob.generate_target()
         mob.target.move_to(m.box).shift(DOWN*.15*my.height)
-        scene.play(MoveToTarget(mob), run_time=rt)
+        scene.play(ScaleAndMove(mob, scale_factor))
+
         if val not in my.set or val is None:
             my.set.add(val)
             my.count += 1

@@ -13,7 +13,7 @@ class sandbox_sam(Scene):
         # self.play(Create(grid.mob))
         # self.play(Create(grid.make_axes()))
         # n6_alg(grid, self, rt=1/30)
-        a = Integer(1)
+        a = MathTex("(2, 3), (3, 2), (1, 1), (0, 5)")
         b = Integer(2)
         bb = HashSet(height=5, width=5)
 
