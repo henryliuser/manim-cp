@@ -7,14 +7,16 @@ class sandbox_sam(Scene):
 
         # self.play(Create(a.mob))
         # self.wait(1)
-        a = gen_random_pasture(5, 7, 7)
+        a = gen_random_pasture(4, 4, 7)
+        a = [(2, 3), (3, 2), (1, 1), (0, 5)]
         grid = make_grid(a)
         self.play(Create(grid.mob))
-        # self.play(Create(grid.make_axes()))
+        self.play(Create(grid.make_axes()))
+        n6_alg(grid, self, rt=1/30)
         self.wait(1)
         # new_grid = make_grid(compress_grid(a))
         # self.play(Transform(grid.mob, new_grid.mob))
-        self.wait(1)
+
 
         # b = minimal_enclosures(grid, a)
         #

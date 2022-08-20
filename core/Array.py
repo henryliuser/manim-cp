@@ -26,7 +26,7 @@ class Array(ABWComponent):
                 "fill"   :
                     Rectangle(height=s, width=s,
                               color=my.cell_color, stroke_width=0)
-                        .set_fill(my.cell_color, opacity=0.7),
+                        .set_fill(my.cell_color, opacity=.7),
 
                 "border" :
                     Rectangle(height=my.height, width=my.width)

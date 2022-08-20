@@ -130,7 +130,7 @@ def n6_alg(grid, scene, rt=1/6):
         ng = grid.sub_grid(*coords)
         c = grid.cells_in_rect(*coords)
         scene.play(Transform(pg, ng), run_time=rt)
-        scene.wait(.2)
+        scene.wait(rt/2)
         for x in c:
             scene.play(x.anim_highlight(RED), run_time=rt/2)
         scene.play(*[x.anim_highlight(BLACK) for x in c], run_time=rt)
@@ -141,7 +141,7 @@ def n5_alg(grid, scene, rt=1/6):
     area = 0
     total = []
 
-    for coords in unwrap_coords(grid)[:30]:
+    for coords in unwrap_coords(grid):
         ng = grid.sub_grid(*coords)
         c = grid.cells_in_rect(*coords)
 
@@ -156,7 +156,7 @@ def n5_alg(grid, scene, rt=1/6):
             if x not in total:
                 scene.play(x.anim_highlight(RED), run_time=rt/2)
         total += c
-        scene.wait(.2)
+        scene.wait(rt)
 
 def maps(coords_list):
     x_map, y_map = {}, {}
