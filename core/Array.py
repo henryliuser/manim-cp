@@ -21,11 +21,11 @@ class Array(ABWComponent):
             my.height *= my.scale
             my.width *= my.scale
             my.stroke_width *= my.scale
-            s = my.height - my.stroke_width / 50
+            s = my.height - my.stroke_width / 100
             mobs =  {
                 "fill"   :
                     Rectangle(height=s, width=s,
-                              color=my.cell_color, stroke_width=my.stroke_width)
+                              color=my.cell_color, stroke_width=0)
                         .set_fill(my.cell_color, opacity=0.7),
 
                 "border" :
@@ -34,8 +34,8 @@ class Array(ABWComponent):
             }
             if isinstance(my.value, int):
                 mobs["tex"] = Tex(my.value).scale(my.scale)
-            else:
-                mobs["val"] = my.value
+            elif my.value is not None:
+                mobs["val"] = my.value.scale(my.scale)
             super().__init__(my, mobs, kwargs)
 
         def anim_set_val(self, val):
