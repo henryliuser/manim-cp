@@ -5,18 +5,21 @@ from common import *
 class sandbox_sam(Scene):
     def construct(self):
 
-        a = gen_random_pasture(5, 12, 12)
+        # self.play(Create(a.mob))
+        # self.wait(1)
+        a = gen_random_pasture(5, 7, 7)
         grid = make_grid(a)
         self.play(Create(grid.mob))
         # self.play(Create(grid.make_axes()))
         self.wait(1)
-        new_grid = make_grid(compress_grid(a))
-        self.play(Transform(grid.mob, new_grid.mob))
+        # new_grid = make_grid(compress_grid(a))
+        # self.play(Transform(grid.mob, new_grid.mob))
         self.wait(1)
 
         # b = minimal_enclosures(grid, a)
         #
         # go_through_rects(b, grid, self)
+        # self.wait(1)
 
         # p = grid[0][0]
         # adder = p.props.stroke_width/100

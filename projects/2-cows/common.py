@@ -4,6 +4,52 @@ from random import choice
 
 class Cow(ABWComponent):
     def __init__(self, **kwargs):
+        # props = {
+        #     "radius": .3,
+        # }
+        # my = self.props = Namespace(props, kwargs)
+        # r = my.radius
+        #
+        # skin = Circle(fill_opacity=1, stroke_width=0,
+        #            color=WHITE, radius = 1*r)
+        # snout = Ellipse(fill_opacity=1, color='#FFA1E0',
+        #             stroke_width=0, width=1.1*r, height=.6*r)
+        # snout.shift(.7*DOWN*r)
+        #
+        # eyes = []
+        # nostrils = []
+        # spot_circles = []
+        # for x in [LEFT, RIGHT]:
+        #     eyes.append(Circle(fill_opacity=1, stroke_width=0,
+        #            color=BLACK, radius = .12*r))
+        #     eyes[-1].shift(UP*0*r)
+        #     eyes[-1].shift(x*.5*r)
+        #
+        #     nostrils.append(Ellipse(fill_opacity=1, stroke_width=0,
+        #                 width=.12*r, height=.08*r, color=BLACK))
+        #     nostrils[-1].move_to(snout)
+        #     nostrils[-1].shift(.1 * r * x)
+        #     nostrils[-1].shift(DOWN*.08*r)
+        #
+        #     spot_circles.append(Circle(radius = .8*r))
+        #     spot_circles[-1].shift(x*r)
+        #     spot_circles[-1].shift(UP * r * .2)
+        #
+        # # spot_circles.pop()
+        # # spot_circles[-1].shift(UP*r*.6)
+        #
+        # spots = []
+        # for x in spot_circles:
+        #     spots.append(Intersection(skin, x, color="#633E23",
+        #                  fill_opacity=1, stroke_width=1))
+        #
+        # ordered_parts = [skin, *spots, *eyes, snout, *nostrils]
+        # whole_cow = VGroup(*ordered_parts)
+        #
+        # mobs = {
+        #     "cow": whole_cow
+        # }
+        # super().__init__(my, mobs, kwargs)
         props = {
             "radius": .3,
         }
@@ -12,9 +58,9 @@ class Cow(ABWComponent):
 
         skin = Circle(fill_opacity=1, stroke_width=0,
                    color=WHITE, radius = 1*r)
-        snout = Ellipse(fill_opacity=1, color=LIGHT_PINK,
-                    stroke_width=0, width=.6*r, height=.5*r)
-        snout.shift(.35*DOWN*r)
+        snout = Ellipse(fill_opacity=1, color='#FFA1E0',
+                    stroke_width=0, width=1.1*r, height=.6*r)
+        snout.shift(.7*DOWN*r)
 
         eyes = []
         nostrils = []
@@ -22,7 +68,7 @@ class Cow(ABWComponent):
         for x in [LEFT, RIGHT]:
             eyes.append(Circle(fill_opacity=1, stroke_width=0,
                    color=BLACK, radius = .15*r))
-            eyes[-1].shift(UP*.3*r)
+            eyes[-1].shift(UP*0*r)
             eyes[-1].shift(x*.3*r)
 
             nostrils.append(Ellipse(fill_opacity=1, stroke_width=0,
@@ -31,12 +77,15 @@ class Cow(ABWComponent):
             nostrils[-1].shift(.1 * r * x)
             nostrils[-1].shift(DOWN*.08*r)
 
-            spot_circles.append(Circle(radius = .4*r))
-            spot_circles[-1].shift(x*r)
+            spot_circles.append(Circle(radius = .5*r))
+            spot_circles[-1].shift(x*r*.7)
+
+        spot_circles.pop()
+        spot_circles[-1].shift(UP*r*.6)
 
         spots = []
         for x in spot_circles:
-            spots.append(Intersection(skin, x, color=DARK_BROWN,
+            spots.append(Intersection(skin, x, color="#5C3B24",
                          fill_opacity=1, stroke_width=1))
 
         ordered_parts = [skin, *spots, *eyes, snout, *nostrils]
