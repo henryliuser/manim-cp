@@ -96,6 +96,72 @@ class Cow(ABWComponent):
         }
         super().__init__(my, mobs, kwargs)
 
+class HashSet(ABWComponent):
+    def __init__(self, **kwargs):
+        props = {
+            "height": 3,
+            "width": 3,
+            "color": BLACK,
+            "outline": WHITE,
+            "count": 0,
+            "set": set([-1]),
+        }
+        my = self.props = Namespace(props, kwargs)
+        my.fs = fs =  10*my.width
+        mobs = {
+            "box": Rectangle(color=my.outline, fill_opacity=1, fill_color=my.color,
+                             height=my.height, width=my.width),
+            "label": Tex("HashSet", font_size=fs),
+            "counter": Integer(my.count, font_size=fs),
+            "text": Tex("Distinct subsets: ", font_size=fs),
+            "error": Tex("Already counted", font_size = fs, color=RED),
+            "success": Tex("New subset", font_size = fs, color=GREEN),
+        }
+
+        super().__init__(my, mobs, kwargs)
+        my.buffer = my.width*.04
+        m = self.mobs
+        m.label.shift(UP*.3*my.height)
+        m.counter.move_to(m.text).next_to(m.text, RIGHT, buff=my.buffer)
+        VGroup(m.text, m.counter).move_to(m.box).shift(UP*.1*my.height)
+        m.error.shift(DOWN*.35*my.height).scale(1/10000)
+        m.success.move_to(m.error).scale(1/10000)
+
+    def put(self, mob, scene, val=None, rt=1):
+        my = self.props
+        m = self.mobs
+        mob.generate_target()
+        mob.target.move_to(m.box).shift(DOWN*.15*my.height)
+        scene.play(MoveToTarget(mob), run_time=rt)
+        if val not in my.set or val is None:
+            my.set.add(val)
+            my.count += 1
+            a = Integer(my.count, font_size=my.fs)
+            a.move_to(m.counter)
+            a.next_to(m.text, RIGHT, buff=my.buffer)
+
+            scene.play(FadeOut(m.success, run_time=1/60))
+            m.success.scale(10000)
+            scene.play(Create(m.success), run_time=rt/4)
+            scene.wait(rt/4)
+
+            r = [FadeOut(m.counter), FadeIn(a), FadeOut(mob), FadeOut(m.success)]
+            scene.play(*r, run_time=rt/2)
+            self.mob.remove(m.counter)
+            m.counter = a
+            self.mob.add(m.counter)
+            m.success.scale(1/10000)
+
+        else:
+            scene.play(FadeOut(m.error, run_time=1/60))
+            m.error.scale(10000)
+            scene.play(Create(m.error), run_time=rt/4)
+            scene.wait(rt/4)
+            scene.play(FadeOut(mob), FadeOut(m.error), run_time=rt/2)
+            m.error.scale(1/10000)
+
+
+
 def make_grid(points):
     n = max(points)[0] + 1
     m = max(points, key=lambda x:x[1])[1] + 1

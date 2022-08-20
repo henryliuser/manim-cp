@@ -7,12 +7,23 @@ class sandbox_sam(Scene):
 
         # self.play(Create(a.mob))
         # self.wait(1)
-        a = gen_random_pasture(4, 4, 7)
-        a = [(2, 3), (3, 2), (1, 1), (0, 5)]
-        grid = make_grid(a)
-        self.play(Create(grid.mob))
-        self.play(Create(grid.make_axes()))
-        n6_alg(grid, self, rt=1/30)
+        # a = gen_random_pasture(4, 4, 7)
+        # a = [(2, 3), (3, 2), (1, 1), (0, 5)]
+        # grid = make_grid(a)
+        # self.play(Create(grid.mob))
+        # self.play(Create(grid.make_axes()))
+        # n6_alg(grid, self, rt=1/30)
+        a = Integer(1)
+        b = Integer(2)
+        bb = HashSet(height=5, width=5)
+
+        bb.mob.shift(UP)
+
+        a.shift(DOWN)
+        b.shift(LEFT*2)
+        self.play(FadeIn(bb.mob), Create(a), Create(b))
+        bb.put(a, self, val=-1)
+        bb.put(b, self)
         self.wait(1)
         # new_grid = make_grid(compress_grid(a))
         # self.play(Transform(grid.mob, new_grid.mob))
