@@ -87,7 +87,7 @@ class HashSet(ABWComponent):
         scale_factor = min(1, (3/4 * my.width) / width(mob))
         mob.generate_target()
         mob.target.move_to(m.box).shift(DOWN*.15*my.height)
-        scene.play(ScaleAndMove(mob, scale_factor))
+        scene.play(ScaleAndMove(mob, scale_factor), run_time=rt)
 
         if val not in my.set or val is None:
             my.set.add(val)
@@ -112,7 +112,7 @@ class HashSet(ABWComponent):
             scene.play(FadeOut(m.error, run_time=1/60))
             m.error.scale(10000)
             scene.play(Create(m.error), run_time=rt/4)
-            scene.wait(rt/4)
+            scene.wait(rt/2)
             scene.play(FadeOut(mob), FadeOut(m.error), run_time=rt/2)
             m.error.scale(1/10000)
 
@@ -203,7 +203,6 @@ class CoordinateList(ABWComponent):
             scene.play(*self.reset(), run_time=1/60)
         return nl, res
 
-
 def make_grid(points):
     n = max(points)[0] + 1
     m = max(points, key=lambda x:x[1])[1] + 1
@@ -257,12 +256,17 @@ def sweep(coords, grid, cl, rt=1/12):
         t += rt
     return squish_helper(anim_queue)
 
+def right(coords):
+    cpy = list(coords)
+    cpy[1] = cpy[3]
+    return tuple(cpy)
+
 
 def n6_alg(grid, scene, cl, hs, rt=1/6):
     pg = grid.sub_grid(0, 0, 0, 0)
     scene.play(FadeIn(pg), run_time=rt)
 
-    for coords in unwrap_coords(grid)[:20]:
+    for coords in unwrap_coords(grid)[:40]:
         # new enclosure
         ng = grid.sub_grid(*coords)
         scene.play(Transform(pg, ng), run_time=rt)
@@ -276,69 +280,45 @@ def n6_alg(grid, scene, cl, hs, rt=1/6):
         # hashset insertion
         nl, res = cl.pop(scene)
         if res:
-            hs.put(nl, scene, val=res, rt=rt)
+            hs.put(nl, scene, val=res, rt=rt*3)
         scene.remove(nl)
 
         # reset
         scene.play(*grid.remove_highlights())
 
 
+
 def n5_alg(grid, scene, cl, hs, rt=1/6):
     pg = grid.sub_grid(0, 0, 0, 0)
     scene.play(FadeIn(pg), run_time=rt)
-    area = 0
-    total = []
-    flag = False
+    w = 0
 
-    for coords in unwrap_coords(grid)[:30]:
+    for coords in unwrap_coords(grid)[:25]:
+        # new enclosure
         ng = grid.sub_grid(*coords)
-
-        new_area = width(ng) * height(ng)
-        if new_area <= area:
-            nl, res = cl.pop(scene)
-            hs.put(nl, scene, val=res)
-            scene.play(*[x.anim_highlight(BLACK) for x in total], run_time=rt)
-            total = []
-            flag = False
-
-        if flag:
-            nl = cl.mob.copy()
-            hs.put(nl, scene, val=tuple(cl.props.coords))
-
-        area = new_area
-
+        nw = width(ng)
+        # reset when shrinking
+        if nw <= w:
+            scene.play(*grid.remove_highlights(), *cl.reset())
+        w = nw
         scene.play(Transform(pg, ng), run_time=rt)
-
-        r = grid.cells_in_rect(*coords)
-        flag = False
-
-        t = 0
-        anim_queue = []
-        sm = (len(r) - len(total)) * rt/2 + rt * 2
-        s = smooth
-        # sweep
-        for x, y, c in r:
-            if c not in total:
-                if is_cow(c):
-                    a = t/sm
-                    b = (t+rt/2)/sm
-                    anim_queue.append(c.anim_highlight(GREEN,
-                                                       rate_func=squish_rate_func(s,a,b)))
-                    # scene.wait(rt)
-                    # scene.play(*cl.AddFromAxes(x, y, grid), run_time=rt*4)
-                    b = (t+rt*2)/sm
-                    anim_queue.extend(cl.AddFromAxes(x, y, grid,
-                                                      rf=squish_rate_func(s,a,b)))
-                    flag = True
-
-                else:
-                    a = t/sm
-                    b = (t+rt/2)/sm
-                    anim_queue.append(c.anim_highlight(RED, rate_func=squish_rate_func(s,a,b)))
-                total.append(c)
-                t += rt / 2
-        scene.play(*anim_queue, run_time=sm)
         scene.wait(rt)
+
+
+        # sweep
+        pc = len(cl.props.coords)
+        anims, run_time = sweep(right(coords), grid, cl, rt=rt/2)
+        scene.play(*anims, run_time=run_time)
+        nc = len(cl.props.coords)
+        scene.wait(rt/2)
+
+        # hashset insertion
+        if nc > pc:
+            nl = cl.mob.copy()
+            hs.put(nl, scene, val=tuple(cl.props.coords), rt=rt*3)
+
+    scene.play(*grid.remove_highlights())
+
 
 def maps(coords_list):
     x_map, y_map = {}, {}
