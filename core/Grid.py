@@ -5,7 +5,7 @@ from copy import deepcopy
 class Grid(ABWComponent):
     def __init__(self, A, scale=0, **kwargs):
         if scale == 0:
-            scale = 6 / len(A)
+            scale = 4 / len(A)
         props = {
             "ny": len(A[0]),
             "nx": len(A),
@@ -72,7 +72,7 @@ class Grid(ABWComponent):
         res = []
         for x in range(x1, x2 + 1):
             for y in range(y1, y2 + 1):
-                res.append(self[x][y])
+                res.append((x, y, self[x][y]))
         return res
 
 
