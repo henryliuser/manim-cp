@@ -71,7 +71,6 @@ class HashSet(ABWComponent):
             "error": Tex("Already counted", font_size = fs, color=RED),
             "success": Tex("New subset", font_size = fs, color=GREEN),
         }
-
         super().__init__(my, mobs, kwargs)
         my.buffer = my.width*.04
         m = self.mobs
@@ -127,7 +126,8 @@ class CoordinateList(ABWComponent):
         }
         my = self.props = Namespace(props, kwargs)
         mobs = {
-            "starter": Circle(stroke_width=0, fill_opacity=0, radius=0)
+            "starter": Circle(stroke_width=0, fill_opacity=0, radius=0),
+            "cursor": Circle(stroke_width=0, fill_opacity=0, radius=0)
         }
         super().__init__(my, mobs, kwargs)
 
@@ -150,17 +150,22 @@ class CoordinateList(ABWComponent):
         self.append(new_mob, (x, y))
         return FadeIn(new_mob)
 
-    def AddFromAxes(self, x, y, grid, rf=smooth):
-
+    def AddFromAxes(self, x, y, grid, rate_func=smooth):
         my = self.props
         pre = ',' if my.coords else ''
+        s1 = f"{pre}({x},{y})"
         mobs = []
-        for s in f"{pre}({x},{y})":
+        for i, s in enumerate(s1):
             mobs.append(MathTex(s))
-            mobs[-1].next_to(self.mob, RIGHT, buff=.1*my.scale)
+            if i == 0:
+                mobs[-1].next_to(self.mobs.cursor, RIGHT, buff=-.1)
+            else:
+                buff = .2*my.scale if (len(s1) == 6 and i == 1) else .1*my.scale
+                mobs[-1].next_to(mobs[-2], RIGHT, buff=buff)
             self.mob.add(mobs[-1])
 
         self.mob.remove(*mobs)
+        self.mobs.cursor.next_to(mobs[-1], RIGHT)
 
         mobs[-3].shift(DOWN*.2*my.scale)
         if len(mobs) == 6:
@@ -168,13 +173,13 @@ class CoordinateList(ABWComponent):
 
         x1, y1 = grid.mobs.x_axis[x], grid.mobs.y_axis[y]
         x2, y2 = x1.copy(), y1.copy()
-        res = [Transform(x2, mobs[-2], rate_func=rf),
-               Transform(y2, mobs[-4], rate_func=rf)]
+        res = [Transform(x2, mobs[-2], rate_func=rate_func),
+               Transform(y2, mobs[-4], rate_func=rate_func)]
 
         mobs.pop(-4)
         mobs.pop(-2)
 
-        res += [FadeIn(x, rate_func=rf) for x in mobs]
+        res += [FadeIn(x, rate_func=rate_func) for x in mobs]
         new_mob = VGroup(*mobs, x2, y2)
         self.append(new_mob, (x, y))
         return res
@@ -186,6 +191,7 @@ class CoordinateList(ABWComponent):
         for x in my.coords_mobs:
             self.mob.remove(x)
         my.coords_mobs = []
+        self.mobs.cursor.move_to(self.mobs.starter)
         return res
 
     def pop(self, scene):
@@ -193,7 +199,8 @@ class CoordinateList(ABWComponent):
         scene.add(nl)
         scene.remove(*self.props.coords_mobs)
         res = tuple(self.props.coords)
-        scene.play(*self.reset(), run_time=1/60)
+        if res:
+            scene.play(*self.reset(), run_time=1/60)
         return nl, res
 
 
@@ -222,28 +229,58 @@ def go_through_rects(coords_list, grid, scene, rt=1/6):
         scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt*2)
 
+def squish_helper(A):
+    end_time = lambda x:x[1] + x[2]
+    total = end_time(max(A, key=end_time))
+    res = []
+    for func, start_time, run_time, args, kwargs in A:
+        a = start_time/total
+        b = (start_time + run_time) / total
+        rf = squish_rate_func(smooth, a, b)
+        try:
+            res.extend(func(*args, **kwargs, rate_func=rf))
+        except TypeError:
+            res.append(func(*args, **kwargs, rate_func=rf))
+    return res, total
 
-def n6_alg(grid, scene, rt=1/6):
+
+def sweep(coords, grid, cl, rt=1/12):
+    t = 0
+    anim_queue = []
+    r = grid.cells_in_rect(*coords)
+    for x, y, c in r:
+        if is_cow(c):
+            anim_queue.append((c.anim_highlight, t, rt, [GREEN], {}))
+            anim_queue.append((cl.AddFromAxes, t, rt*4, [x, y, grid], {}))
+        else:
+            anim_queue.append((c.anim_highlight, t, rt, [RED], {}))
+        t += rt
+    return squish_helper(anim_queue)
+
+
+def n6_alg(grid, scene, cl, hs, rt=1/6):
     pg = grid.sub_grid(0, 0, 0, 0)
     scene.play(FadeIn(pg), run_time=rt)
 
-    for coords in unwrap_coords(grid):
+    for coords in unwrap_coords(grid)[:20]:
+        # new enclosure
         ng = grid.sub_grid(*coords)
-        r = grid.cells_in_rect(*coords)
         scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt)
-        for x, y, c in r:
-            scene.play(c.anim_highlight(RED), run_time=rt/2)
-        scene.play(*[c.anim_highlight(BLACK) for x, y, c in r], run_time=rt)
 
-def composite(a):
-    total = sum(a)
-    running_total = 0
-    res = []
-    for t in a:
-        res.append(squish_rate_func(smooth, running_total/total, (running_total + t)/total))
-        running_total += t
-    return total, res
+        # sweep
+        anims, run_time = sweep(coords, grid, cl, rt=rt/2)
+        scene.play(*anims, run_time=run_time)
+
+        scene.wait(rt/2)
+        # hashset insertion
+        nl, res = cl.pop(scene)
+        if res:
+            hs.put(nl, scene, val=res, rt=rt)
+        scene.remove(nl)
+
+        # reset
+        scene.play(*grid.remove_highlights())
 
 
 def n5_alg(grid, scene, cl, hs, rt=1/6):
@@ -312,15 +349,12 @@ def maps(coords_list):
 
 def is_minimal(coords, x_map, y_map):
     x1, y1, x2, y2 = coords
-    if not (x1 in x_map and y1 <= x_map[x1] <= y2):
-        return False
-    if not (x2 in x_map and y1 <= x_map[x2] <= y2):
-        return False
-    if not (y1 in y_map and x1 <= y_map[y1] <= x2):
-        return False
-    if not (y2 in y_map and x1 <= y_map[y2] <= x2):
-        return False
-    return True
+    res = []
+    for x in [x1, x2]:
+        res.append(x in x_map and y1 <= x_map[x] <= y2)
+    for y in [y1, y2]:
+        res.append(y in y_map and x1 <= y_map[y] <= x2)
+    return all(res)
 
 # returns corner coordinates for all minimal enclosures
 def minimal_enclosures(grid, pairs):
@@ -342,7 +376,7 @@ def gen_random_pasture(num_cows, mx, my):
 
 def is_cow(cell):
     try:
-        val = cell.mobs.val
+        cell.mobs.val
         return True
     except AttributeError:
         return False

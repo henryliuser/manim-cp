@@ -75,6 +75,16 @@ class Grid(ABWComponent):
                 res.append((x, y, self[x][y]))
         return res
 
+    def highlight_region(self, x1, y1, x2, y2, color=BLACK):
+        cells = []
+        for x in range(x1, x2 + 1):
+            for y in range(y1, y2 + 1):
+                cells.append(self[x][y])
+        return [c.anim_highlight(color) for c in cells]
+
+    def remove_highlights(self):
+        coords = (0, 0, self.props.nx - 1, self.props.ny - 1)
+        return self.highlight_region(*coords, color=BLACK)
 
     def append(self, x):
         if isinstance(x, Array):
