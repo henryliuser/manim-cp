@@ -211,7 +211,7 @@ def make_grid(points):
         mtx[x][y] = Cow().mob
     return Grid(mtx)
 
-def unwrap_coords(grid):
+def unwrap_rects(grid):
     res = []
     for x1 in range(grid.props.nx):
         for y1 in range(grid.props.ny):
@@ -220,19 +220,19 @@ def unwrap_coords(grid):
                     res.append((x1, y1, x2, y2))
     return res
 
-def go_through_rects(coords_list, grid, scene, rt=1/6):
-    pg = grid.sub_grid(*coords_list[0])
+def go_through_rects(rects_list, grid, scene, rt=1 / 6):
+    pg = grid.sub_grid(*rects_list[0])
     scene.play(FadeIn(pg), run_time=rt)
-    for coords in coords_list:
-        ng = grid.sub_grid(*coords)
+    for rect in rects_list:
+        ng = grid.sub_grid(*rect)
         scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt*2)
 
-def squish_helper(A):
+def squish_helper(anim_queue):
     end_time = lambda x:x[1] + x[2]
-    total = end_time(max(A, key=end_time))
+    total = end_time(max(anim_queue, key=end_time))
     res = []
-    for func, start_time, run_time, args, kwargs in A:
+    for func, start_time, run_time, args, kwargs in anim_queue:
         a = start_time/total
         b = (start_time + run_time) / total
         rf = squish_rate_func(smooth, a, b)
@@ -243,10 +243,10 @@ def squish_helper(A):
     return res, total
 
 
-def sweep(coords, grid, cl, rt=1/12):
+def sweep(rect, grid, cl, rt=1 / 12):
     t = 0
     anim_queue = []
-    r = grid.cells_in_rect(*coords)
+    r = grid.cells_in_rect(*rect)
     for x, y, c in r:
         if is_cow(c):
             anim_queue.append((c.anim_highlight, t, rt, [GREEN], {}))
@@ -256,8 +256,8 @@ def sweep(coords, grid, cl, rt=1/12):
         t += rt
     return squish_helper(anim_queue)
 
-def right(coords):
-    cpy = list(coords)
+def right(rect):
+    cpy = list(rect)
     cpy[1] = cpy[3]
     return tuple(cpy)
 
@@ -266,14 +266,14 @@ def n6_alg(grid, scene, cl, hs, rt=1/6):
     pg = grid.sub_grid(0, 0, 0, 0)
     scene.play(FadeIn(pg), run_time=rt)
 
-    for coords in unwrap_coords(grid)[:40]:
+    for rect in unwrap_rects(grid)[:40]:
         # new enclosure
-        ng = grid.sub_grid(*coords)
+        ng = grid.sub_grid(*rect)
         scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt)
 
         # sweep
-        anims, run_time = sweep(coords, grid, cl, rt=rt/2)
+        anims, run_time = sweep(rect, grid, cl, rt=rt/2)
         scene.play(*anims, run_time=run_time)
 
         scene.wait(rt/2)
@@ -293,9 +293,9 @@ def n5_alg(grid, scene, cl, hs, rt=1/6):
     scene.play(FadeIn(pg), run_time=rt)
     w = 0
 
-    for coords in unwrap_coords(grid)[:25]:
+    for rect in unwrap_rects(grid)[:25]:
         # new enclosure
-        ng = grid.sub_grid(*coords)
+        ng = grid.sub_grid(*rect)
         nw = width(ng)
         # reset when shrinking
         if nw <= w:
@@ -307,7 +307,7 @@ def n5_alg(grid, scene, cl, hs, rt=1/6):
 
         # sweep
         pc = len(cl.props.coords)
-        anims, run_time = sweep(right(coords), grid, cl, rt=rt/2)
+        anims, run_time = sweep(right(rect), grid, cl, rt=rt/2)
         scene.play(*anims, run_time=run_time)
         nc = len(cl.props.coords)
         scene.wait(rt/2)
@@ -320,15 +320,16 @@ def n5_alg(grid, scene, cl, hs, rt=1/6):
     scene.play(*grid.remove_highlights())
 
 
-def maps(coords_list):
+def maps(cows):
     x_map, y_map = {}, {}
-    for x, y in coords_list:
+    for x, y in cows:
         x_map[x] = y
         y_map[y] = x
     return x_map, y_map
 
-def is_minimal(coords, x_map, y_map):
-    x1, y1, x2, y2 = coords
+
+def is_minimal(rects, x_map, y_map):
+    x1, y1, x2, y2 = rects
     res = []
     for x in [x1, x2]:
         res.append(x in x_map and y1 <= x_map[x] <= y2)
@@ -337,9 +338,9 @@ def is_minimal(coords, x_map, y_map):
     return all(res)
 
 # returns corner coordinates for all minimal enclosures
-def minimal_enclosures(grid, pairs):
-    x_map, y_map = maps(pairs)
-    a = unwrap_coords(grid)
+def minimal_enclosures(grid, cows):
+    x_map, y_map = maps(cows)
+    a = unwrap_rects(grid)
     return [c for c in a if is_minimal(c, x_map, y_map)]
 
 # pass result into make_grid
@@ -361,11 +362,11 @@ def is_cow(cell):
     except AttributeError:
         return False
 
-def compress_grid(coords):
-    x_map, y_map = maps(coords)
+def compress_grid(cows):
+    x_map, y_map = maps(cows)
     sx = {x:i for i, x in enumerate(sorted(y_map.values()))}
     sy = {x:i for i, x in enumerate(sorted(x_map.values()))}
-    new_coords = []
-    for x, y in coords:
-        new_coords.append((sx[x], sy[y]))
-    return new_coords
+    new_cows = []
+    for x, y in cows:
+        new_cows.append((sx[x], sy[y]))
+    return new_cows
