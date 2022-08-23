@@ -8,29 +8,28 @@ class Array(ABWComponent):
     class Element(ABWComponent):
         def __init__(self, **kwargs):
             props = {
-                "outline_color" : BLUE,
-                "value_color"   : WHITE,
-                "cell_color"    : BLACK,
-                "height"        : 1,
-                "width"         : 1,
-                "stroke_width"  : 5,
-                "value"         : 0,
-                "scale"         : 1,
+                "outline_color": BLUE,
+                "value_color": WHITE,
+                "color": BLACK,
+                "height": 1,
+                "width": 1,
+                "stroke_width": 5,
+                "value": 0,
+                "scale": 1,
             }
             my = self.props = Namespace(props, kwargs)
             my.height *= my.scale
             my.width *= my.scale
             my.stroke_width *= my.scale
             s = my.height - my.stroke_width / 100
-            mobs =  {
-                "fill"   :
+            mobs = {
+                "fill":
                     Rectangle(height=s, width=s,
-                              color=my.cell_color, stroke_width=0)
-                        .set_fill(my.cell_color, opacity=.7),
-
-                "border" :
+                              stroke_width=0, color=my.color,
+                              fill_opacity=1),
+                "border":
                     Rectangle(height=my.height, width=my.width)
-                        .set_stroke(BLUE, my.stroke_width, 1),
+                .set_stroke(my.outline_color, my.stroke_width, 1),
             }
             if isinstance(my.value, int):
                 mobs["tex"] = Tex(my.value).scale(my.scale)
@@ -40,7 +39,7 @@ class Array(ABWComponent):
 
         def anim_set_val(self, val):
             self.props.value = val
-            tf = Tex( str(val) ).move_to(self.mobs.tex)
+            tf = Tex(str(val)).move_to(self.mobs.tex)
             res = Transform(self.mobs.tex, tf)
             return res
 
@@ -53,14 +52,14 @@ class Array(ABWComponent):
         if scale == 0:
             scale = 6 / len(A)
         props = {
-            "N"   : len(A),
-            "arr": [Array.Element(value=x, scale=scale) for x in A],
+            "N": len(A),
+            "arr": [],
         }
         self.og = A
         my = self.props = Namespace(props, kwargs)
-
+        my.arr = [Array.Element(value=x, scale=scale, **kwargs) for x in A]
         # align the cells next to each other
-        mobs = { i:self(i) for i in range(my.N) }
+        mobs = {i: self(i) for i in range(my.N)}
         for i in range(1, my.N):
             self(i).next_to(self(i-1), RIGHT, buff=0)
 
@@ -85,8 +84,8 @@ class Array(ABWComponent):
     def __getitem__(self, i):  # exposes the i-th Array.Element
         if isinstance(i, slice):
             start = i.start if i.start != None else 0
-            stop  = i.stop  if i.stop  != None else self.props.N
-            step  = i.step  if i.step  != None else 1
+            stop = i.stop if i.stop != None else self.props.N
+            step = i.step if i.step != None else 1
             ele, mob = [], VGroup()
             for j in range(start, stop, step):
                 e = deepcopy(self[j])

@@ -2,6 +2,7 @@ from manim import *
 from core import *
 from random import choice
 
+
 class Cow(ABWComponent):
     def __init__(self, **kwargs):
         props = {
@@ -11,9 +12,9 @@ class Cow(ABWComponent):
         r = my.radius
 
         skin = Circle(fill_opacity=1, stroke_width=0,
-                   color=WHITE, radius = 1*r)
+                      color=WHITE, radius=1*r)
         snout = Ellipse(fill_opacity=1, color='#FFA1E0',
-                    stroke_width=0, width=1.1*r, height=.6*r)
+                        stroke_width=0, width=1.1*r, height=.6*r)
         snout.shift(.7*DOWN*r)
 
         eyes = []
@@ -21,17 +22,17 @@ class Cow(ABWComponent):
         spot_circles = []
         for x in [LEFT, RIGHT]:
             eyes.append(Circle(fill_opacity=1, stroke_width=0,
-                   color=BLACK, radius = .15*r))
+                               color=BLACK, radius=.15*r))
             eyes[-1].shift(UP*0*r)
             eyes[-1].shift(x*.3*r)
 
             nostrils.append(Ellipse(fill_opacity=1, stroke_width=0,
-                        width=.12*r, height=.08*r, color=BLACK))
+                                    width=.12*r, height=.08*r, color=BLACK))
             nostrils[-1].move_to(snout)
             nostrils[-1].shift(.1 * r * x)
             nostrils[-1].shift(DOWN*.08*r)
 
-            spot_circles.append(Circle(radius = .5*r))
+            spot_circles.append(Circle(radius=.5*r))
             spot_circles[-1].shift(x*r*.7)
 
         spot_circles.pop()
@@ -39,7 +40,7 @@ class Cow(ABWComponent):
 
         spots = []
         for x in spot_circles:
-            spots.append(Intersection(skin, x, color="#5C3B24",
+            spots.append(Intersection(skin, x, color=BLACK,
                          fill_opacity=1, stroke_width=1))
 
         ordered_parts = [skin, *spots, *eyes, snout, *nostrils]
@@ -49,6 +50,7 @@ class Cow(ABWComponent):
             "cow": whole_cow
         }
         super().__init__(my, mobs, kwargs)
+
 
 class HashSet(ABWComponent):
     def __init__(self, **kwargs):
@@ -61,15 +63,15 @@ class HashSet(ABWComponent):
             "set": set([-1]),
         }
         my = self.props = Namespace(props, kwargs)
-        my.fs = fs =  10*my.width
+        my.fs = fs = 10*my.width
         mobs = {
             "box": Rectangle(color=my.outline, fill_opacity=1, fill_color=my.color,
                              height=my.height, width=my.width),
             "label": Tex("HashSet", font_size=fs),
             "counter": Integer(my.count, font_size=fs),
             "text": Tex("Distinct subsets: ", font_size=fs),
-            "error": Tex("Already counted", font_size = fs, color=RED),
-            "success": Tex("New subset", font_size = fs, color=GREEN),
+            "error": Tex("Already counted", font_size=fs, color=RED),
+            "success": Tex("New subset", font_size=fs, color=GREEN),
         }
         super().__init__(my, mobs, kwargs)
         my.buffer = my.width*.04
@@ -101,7 +103,8 @@ class HashSet(ABWComponent):
             scene.play(Create(m.success), run_time=rt/4)
             scene.wait(rt/4)
 
-            r = [FadeOut(m.counter), FadeIn(a), FadeOut(mob), FadeOut(m.success)]
+            r = [FadeOut(m.counter), FadeIn(
+                a), FadeOut(mob), FadeOut(m.success)]
             scene.play(*r, run_time=rt/2)
             self.mob.remove(m.counter)
             m.counter = a
@@ -160,7 +163,8 @@ class CoordinateList(ABWComponent):
             if i == 0:
                 mobs[-1].next_to(self.mobs.cursor, RIGHT, buff=-.1)
             else:
-                buff = .2*my.scale if (len(s1) == 6 and i == 1) else .1*my.scale
+                buff = .2*my.scale if (len(s1) == 6 and i ==
+                                       1) else .1*my.scale
                 mobs[-1].next_to(mobs[-2], RIGHT, buff=buff)
             self.mob.add(mobs[-1])
 
@@ -171,7 +175,7 @@ class CoordinateList(ABWComponent):
         if len(mobs) == 6:
             mobs[0].shift(DOWN*.2*my.scale)
 
-        x1, y1 = grid.mobs.x_axis[x], grid.mobs.y_axis[y]
+        x1, y1 = grid.mobs.x_axis[y], grid.mobs.y_axis[x]
         x2, y2 = x1.copy(), y1.copy()
         res = [Transform(x2, mobs[-2], rate_func=rate_func),
                Transform(y2, mobs[-4], rate_func=rate_func)]
@@ -203,13 +207,15 @@ class CoordinateList(ABWComponent):
             scene.play(*self.reset(), run_time=1/60)
         return nl, res
 
-def make_grid(points):
+
+def make_grid(points, **kwargs):
     n = max(points)[0] + 1
-    m = max(points, key=lambda x:x[1])[1] + 1
+    m = max(points, key=lambda x: x[1])[1] + 1
     mtx = [[None for _ in range(m)] for _ in range(n)]
     for x, y in points:
         mtx[x][y] = Cow().mob
-    return Grid(mtx)
+    return Grid(mtx, **kwargs)
+
 
 def unwrap_rects(grid):
     res = []
@@ -220,16 +226,22 @@ def unwrap_rects(grid):
                     res.append((x1, y1, x2, y2))
     return res
 
-def go_through_rects(rects_list, grid, scene, rt=1 / 6):
-    pg = grid.sub_grid(*rects_list[0])
-    scene.play(FadeIn(pg), run_time=rt)
-    for rect in rects_list:
-        ng = grid.sub_grid(*rect)
+
+def go_through_rects(rects_list, grid, scene, rt=1/6, pg = None, **kwargs):
+    i = 0
+    if pg is None:
+        pg = grid.sub_grid(*rects_list[0], **kwargs)
+        scene.play(FadeIn(pg), run_time=rt)
+        i += 1
+    for rect in rects_list[i:]:
+        ng = grid.sub_grid(*rect, **kwargs)
         scene.play(Transform(pg, ng), run_time=rt)
-        scene.wait(rt*2)
+        scene.wait(rt)
+    return pg
+
 
 def squish_helper(anim_queue):
-    end_time = lambda x:x[1] + x[2]
+    def end_time(x): return x[1] + x[2]
     total = end_time(max(anim_queue, key=end_time))
     res = []
     for func, start_time, run_time, args, kwargs in anim_queue:
@@ -255,6 +267,7 @@ def sweep(rect, grid, cl, rt=1 / 12):
             anim_queue.append((c.anim_highlight, t, rt, [RED], {}))
         t += rt
     return squish_helper(anim_queue)
+
 
 def right(rect):
     cpy = list(rect)
@@ -287,7 +300,6 @@ def n6_alg(grid, scene, cl, hs, rt=1/6):
         scene.play(*grid.remove_highlights())
 
 
-
 def n5_alg(grid, scene, cl, hs, rt=1/6):
     pg = grid.sub_grid(0, 0, 0, 0)
     scene.play(FadeIn(pg), run_time=rt)
@@ -303,7 +315,6 @@ def n5_alg(grid, scene, cl, hs, rt=1/6):
         w = nw
         scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt)
-
 
         # sweep
         pc = len(cl.props.coords)
@@ -338,12 +349,16 @@ def is_minimal(rects, x_map, y_map):
     return all(res)
 
 # returns corner coordinates for all minimal enclosures
+
+
 def minimal_enclosures(grid, cows):
     x_map, y_map = maps(cows)
     a = unwrap_rects(grid)
     return [c for c in a if is_minimal(c, x_map, y_map)]
 
 # pass result into make_grid
+
+
 def gen_random_pasture(num_cows, mx, my):
     x_set = list(range(mx))
     y_set = list(range(my))
@@ -355,6 +370,7 @@ def gen_random_pasture(num_cows, mx, my):
         y_set.remove(e[1])
     return res
 
+
 def is_cow(cell):
     try:
         cell.mobs.val
@@ -362,10 +378,11 @@ def is_cow(cell):
     except AttributeError:
         return False
 
+
 def compress_grid(cows):
     x_map, y_map = maps(cows)
-    sx = {x:i for i, x in enumerate(sorted(y_map.values()))}
-    sy = {x:i for i, x in enumerate(sorted(x_map.values()))}
+    sx = {x: i for i, x in enumerate(sorted(y_map.values()))}
+    sy = {x: i for i, x in enumerate(sorted(x_map.values()))}
     new_cows = []
     for x, y in cows:
         new_cows.append((sx[x], sy[y]))

@@ -2,6 +2,7 @@ from manim import *
 from core import *
 from copy import deepcopy
 
+
 class Grid(ABWComponent):
     def __init__(self, A, scale=0, **kwargs):
         if scale == 0:
@@ -9,12 +10,13 @@ class Grid(ABWComponent):
         props = {
             "ny": len(A[0]),
             "nx": len(A),
-            "arr": [Array(x, scale=scale) for x in A],
+            "arr": [],
             "scale": scale,
         }
         self.og = A
         my = self.props = Namespace(props, kwargs)
-        mobs =  {i:self(i) for i in range(my.nx)}
+        my.arr = [Array(x, scale=scale, **kwargs) for x in A]
+        mobs = {i: self(i) for i in range(my.nx)}
         for i in range(1, my.nx):
             self(i).next_to(self(i-1), DOWN, buff=0)
         super().__init__(my, mobs, kwargs)
@@ -50,9 +52,7 @@ class Grid(ABWComponent):
 
         return self.mobs.axes
 
-
-
-    def sub_grid(self, x1, y1, x2, y2):
+    def sub_grid(self, x1, y1, x2, y2, color=YELLOW):
         a = self[x1][y1]
         b = self[x2][y2]
 
@@ -63,8 +63,8 @@ class Grid(ABWComponent):
 
         h = a.props.width*(abs(x1-x2) + 1)
         w = a.props.height*(abs(y1-y2) + 1)
-        c = Rectangle(width=w,height=h,
-                      stroke_width=a.props.stroke_width, color=YELLOW)
+        c = Rectangle(width=w, height=h,
+                      stroke_width=a.props.stroke_width, color=color)
         c.move_to(temp.get_center())
         return c
 
@@ -82,9 +82,12 @@ class Grid(ABWComponent):
                 cells.append(self[x][y])
         return [c.anim_highlight(color) for c in cells]
 
-    def remove_highlights(self):
+    def highlight_all(self, color):
         coords = (0, 0, self.props.nx - 1, self.props.ny - 1)
-        return self.highlight_region(*coords, color=BLACK)
+        return self.highlight_region(*coords, color=color)
+
+    def remove_highlights(self):
+        return self.highlight_all(BLACK)
 
     def append(self, x):
         if isinstance(x, Array):
@@ -104,8 +107,8 @@ class Grid(ABWComponent):
     def __getitem__(self, i):  # exposes the i-th Array.Element
         if isinstance(i, slice):
             start = i.start if i.start != None else 0
-            stop  = i.stop  if i.stop  != None else self.props.N
-            step  = i.step  if i.step  != None else 1
+            stop = i.stop if i.stop != None else self.props.N
+            step = i.step if i.step != None else 1
             ele, mob = [], VGroup()
             for j in range(start, stop, step):
                 e = deepcopy(self[j])
