@@ -52,7 +52,7 @@ class Grid(ABWComponent):
 
         return self.mobs.axes
 
-    def sub_grid(self, x1, y1, x2, y2, color=YELLOW):
+    def sub_grid(self, x1, y1, x2, y2, color="#C4A484"):
         a = self[x1][y1]
         b = self[x2][y2]
 
@@ -87,7 +87,7 @@ class Grid(ABWComponent):
         return self.highlight_region(*coords, color=color)
 
     def remove_highlights(self):
-        return self.highlight_all(BLACK)
+        return self.highlight_all(self[0][0].props.color)
 
     def append(self, x):
         if isinstance(x, Array):

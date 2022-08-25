@@ -7,6 +7,7 @@ class Cow(ABWComponent):
     def __init__(self, **kwargs):
         props = {
             "radius": .3,
+            "spot": BLACK
         }
         my = self.props = Namespace(props, kwargs)
         r = my.radius
@@ -40,7 +41,7 @@ class Cow(ABWComponent):
 
         spots = []
         for x in spot_circles:
-            spots.append(Intersection(skin, x, color=BLACK,
+            spots.append(Intersection(skin, x, color=my.spot,
                          fill_opacity=1, stroke_width=1))
 
         ordered_parts = [skin, *spots, *eyes, snout, *nostrils]
@@ -208,12 +209,12 @@ class CoordinateList(ABWComponent):
         return nl, res
 
 
-def make_grid(points, **kwargs):
+def make_grid(points, spot=BLACK, **kwargs):
     n = max(points)[0] + 1
     m = max(points, key=lambda x: x[1])[1] + 1
     mtx = [[None for _ in range(m)] for _ in range(n)]
     for x, y in points:
-        mtx[x][y] = Cow().mob
+        mtx[x][y] = Cow(spot=spot).mob
     return Grid(mtx, **kwargs)
 
 
@@ -227,15 +228,14 @@ def unwrap_rects(grid):
     return res
 
 
-def go_through_rects(rects_list, grid, scene, rt=1/6, pg = None, **kwargs):
-    i = 0
-    if pg is None:
-        pg = grid.sub_grid(*rects_list[0], **kwargs)
-        scene.play(FadeIn(pg), run_time=rt)
-        i += 1
-    for rect in rects_list[i:]:
+def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None, **kwargs):
+    for rect in rects_list:
         ng = grid.sub_grid(*rect, **kwargs)
-        scene.play(Transform(pg, ng), run_time=rt)
+        if pg is None:
+            pg = ng
+            scene.play(FadeIn(pg), run_time=rt)
+        else:
+            scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt)
     return pg
 
@@ -387,3 +387,33 @@ def compress_grid(cows):
     for x, y in cows:
         new_cows.append((sx[x], sy[y]))
     return new_cows
+
+
+def get_cow_cells(rect, grid):
+    cows = []
+    r = grid.cells_in_rect(*rect)
+    for x, y, c in r:
+        if is_cow(c):
+            cows.append(c)
+    return cows
+
+
+def gtr_enlarge(rects_list, grid, scene, rt=1/6, pg=None, **kwargs):
+    for rect in rects_list[i:]:
+        ng = grid.sub_grid(*rect, **kwargs)
+        cows = get_cow_cells(rect, grid)
+        a = [ScaleInPlace(x.mobs.val, 1.4) for x in cows]
+        a += [x.anim_highlight(BLUE) for x in cows]
+        scene.play(*a, run_time=rt/2)
+        scene.wait(rt)
+        if pg is None:
+            pg = ng
+            scene.play(FadeIn(pg), run_time=rt/2)
+        else:
+            scene.play(Transform(pg, ng), run_time=rt/2)
+        scene.wait(rt)
+        a = [ScaleInPlace(x.mobs.val, 1/1.4) for x in cows]
+        a.extend(grid.remove_highlights())
+        scene.play(*a, run_time=rt/2)
+        scene.wait(rt)
+    return pg

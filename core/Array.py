@@ -8,9 +8,9 @@ class Array(ABWComponent):
     class Element(ABWComponent):
         def __init__(self, **kwargs):
             props = {
-                "outline_color": BLUE,
+                "outline_color": DARKER_GRAY,
                 "value_color": WHITE,
-                "color": BLACK,
+                "color": "#005400",
                 "height": 1,
                 "width": 1,
                 "stroke_width": 5,
