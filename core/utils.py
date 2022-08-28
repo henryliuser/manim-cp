@@ -147,3 +147,8 @@ def ScaleAndMove(mob, scale_factor, target=None):
     temp_mob = mob.copy()
     temp_mob.move_to(target).scale(scale_factor)
     return Transform(mob, temp_mob)
+
+def Move(mob, target):
+    mob.generate_target()
+    mob.target.move_to(target)
+    return MoveToTarget(mob)

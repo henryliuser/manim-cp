@@ -40,15 +40,15 @@ class Grid(ABWComponent):
 
         ms = self.mobs
 
-        ms.x_axis = VGroup(*x_axis)
-        ms.y_axis = VGroup(*y_axis)
+        ms.y_axis = VGroup(*x_axis)
+        ms.x_axis = VGroup(*y_axis)
         ms.axes = VGroup(ms.y_axis, ms.x_axis)
         self.mob.add(ms.x_axis)
         self.mob.add(ms.y_axis)
         self.mob.add(ms.axes)
 
-        my.y_axis = y_axis
-        my.x_axis = x_axis
+        my.x_axis = y_axis
+        my.y_axis = x_axis
 
         return self.mobs.axes
 
@@ -75,6 +75,10 @@ class Grid(ABWComponent):
                 res.append((x, y, self[x][y]))
         return res
 
+    def all_cells(self):
+        coords = (0, 0, self.props.nx - 1, self.props.ny - 1)
+        return self.cells_in_rect(*coords)
+    
     def highlight_region(self, x1, y1, x2, y2, color=BLACK):
         cells = []
         for x in range(x1, x2 + 1):

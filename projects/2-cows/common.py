@@ -1,6 +1,8 @@
+from re import X
 from manim import *
 from core import *
 from random import choice
+from random import seed
 
 
 class Cow(ABWComponent):
@@ -126,6 +128,7 @@ class CoordinateList(ABWComponent):
         props = {
             "coords": [],
             "coords_mobs": [],
+            "commas": [],
             "scale": 1
         }
         my = self.props = Namespace(props, kwargs)
@@ -176,7 +179,7 @@ class CoordinateList(ABWComponent):
         if len(mobs) == 6:
             mobs[0].shift(DOWN*.2*my.scale)
 
-        x1, y1 = grid.mobs.x_axis[y], grid.mobs.y_axis[x]
+        y1, x1 = grid.mobs.x_axis[x], grid.mobs.y_axis[y]
         x2, y2 = x1.copy(), y1.copy()
         res = [Transform(x2, mobs[-2], rate_func=rate_func),
                Transform(y2, mobs[-4], rate_func=rate_func)]
@@ -185,6 +188,13 @@ class CoordinateList(ABWComponent):
         mobs.pop(-2)
 
         res += [FadeIn(x, rate_func=rate_func) for x in mobs]
+
+        if len(mobs) > 3:
+            self.mob.add(mobs[0])
+            self.props.commas.append(mobs[0])
+            mobs.pop(0)
+
+
         new_mob = VGroup(*mobs, x2, y2)
         self.append(new_mob, (x, y))
         return res
@@ -192,10 +202,13 @@ class CoordinateList(ABWComponent):
     def reset(self):
         my = self.props
         my.coords = []
-        res = [FadeOut(x) for x in my.coords_mobs]
+        res = [FadeOut(x) for x in my.coords_mobs + my.commas]
         for x in my.coords_mobs:
             self.mob.remove(x)
+        for x in my.commas:
+            self.mob.remove(x)
         my.coords_mobs = []
+        my.commas = []
         self.mobs.cursor.move_to(self.mobs.starter)
         return res
 
@@ -208,6 +221,76 @@ class CoordinateList(ABWComponent):
             scene.play(*self.reset(), run_time=1/60)
         return nl, res
 
+    # only works on single digits
+    def sort(self, y=False):
+        coords = self.props.coords
+        coords_mobs = self.props.coords_mobs
+        orig_coords = coords.copy()
+        new_coords_mobs = [0] * len(coords)
+    
+        if y:
+            coords.sort(key=lambda x:x[1])
+        else:
+            coords.sort()
+
+        for i in range(len(coords)):
+            coords_mobs[i].generate_target()
+            j = coords.index(orig_coords[i])
+            new_coords_mobs[j] = coords_mobs[i]
+            coords_mobs[i].target.move_to(coords_mobs[j])
+
+        self.props.coords_mobs = new_coords_mobs
+
+        return [MoveToTarget(x) for x in coords_mobs]
+    
+    def index(self):
+        cms = self.props.coords_mobs
+        res = []
+        for i in range(len(cms)):
+            res.append(MathTex(i))
+            res[-1].move_to(cms[i]).shift(UP*.6)
+        x = VGroup(*res)
+        self.mob.add(x)
+        self.mobs.indices = x
+        self.props.indices = res
+        return [Create(y) for y in res]
+
+    def anim_map(self, do_y=False, color=WHITE):
+        coords = self.props.coords
+        if do_y:
+            s = 'y'
+            j = 1
+        else:
+            s = 'x'
+            j = 0
+
+        res = [['old', 'new']]
+        for i in range(len(coords)):
+            res.append([str(coords[i][j]), str(i)])
+        t = Table(res).scale(.8)
+        label = Tex(s + ' values', color=color).next_to(t, UP)
+        c = [Create(label), Create(t[1:]), Create(t[0][:2])]
+        return VGroup(t, label), c
+
+    def fill_map(self, t, do_y=False):
+        if do_y:
+            j = 3
+        else:
+            j = 4
+        coords = self.props.coords_mobs
+        inds = self.props.indices
+        res = []
+        for i in range(len(coords)):
+            new_v = coords[i][j].copy()
+            new_i = inds[i].copy()
+            t.add(new_v)
+            t.add(new_i)
+            i += 1
+            res.append(ScaleAndMove(new_v, 1, t[0][i*2]))
+            res.append(ScaleAndMove(new_i, 1, t[0][i*2 + 1]))
+            t[0][i*2].scale(1/1000)
+            t[0][i*2+1].scale(1/1000)
+        return res
 
 def make_grid(points, spot=BLACK, **kwargs):
     n = max(points)[0] + 1
@@ -228,7 +311,10 @@ def unwrap_rects(grid):
     return res
 
 
-def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None, **kwargs):
+def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None,
+                     wt=-1, **kwargs):
+    if wt == -1:
+        wt = rt
     for rect in rects_list:
         ng = grid.sub_grid(*rect, **kwargs)
         if pg is None:
@@ -236,7 +322,7 @@ def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None, **kwargs):
             scene.play(FadeIn(pg), run_time=rt)
         else:
             scene.play(Transform(pg, ng), run_time=rt)
-        scene.wait(rt)
+        scene.wait(wt)
     return pg
 
 
@@ -360,6 +446,7 @@ def minimal_enclosures(grid, cows):
 
 
 def gen_random_pasture(num_cows, mx, my):
+    seed(10)
     x_set = list(range(mx))
     y_set = list(range(my))
     res = []
@@ -386,6 +473,15 @@ def compress_grid(cows):
     new_cows = []
     for x, y in cows:
         new_cows.append((sx[x], sy[y]))
+    return new_cows
+
+
+def compress_y(cows):
+    x_map, y_map = maps(cows)
+    sx = {x: i for i, x in enumerate(sorted(y_map.values()))}
+    new_cows = []
+    for x, y in cows:
+        new_cows.append((sx[x], y))
     return new_cows
 
 
@@ -417,3 +513,97 @@ def gtr_enlarge(rects_list, grid, scene, rt=1/6, pg=None, **kwargs):
         scene.play(*a, run_time=rt/2)
         scene.wait(rt)
     return pg
+
+def back_grid(cells):
+    res = []
+    for c in cells:
+        res.append(c[2].mobs.fill)
+        res.append(c[2].mobs.border)
+    return VGroup(*res)
+
+def cells_mob(cells):
+    res = []
+    for c in cells:
+        res.append(c[2].mob)
+    return VGroup(*res)
+
+def compress_x(cows):
+    x_map, y_map = maps(cows)
+    sy = {x: i for i, x in enumerate(sorted(x_map.values()))}
+    new_cows = []
+    for x, y in cows:
+        new_cows.append((x, sy[y]))
+    return new_cows, sy
+
+def compress_y(cows):
+    x_map, y_map = maps(cows)
+    sx = {x: i for i, x in enumerate(sorted(y_map.values()))}
+    new_cows = []
+    for x, y in cows:
+        new_cows.append((sx[x], y))
+    return new_cows, sx
+
+
+def anim_compress(cows, grid, scene, do_x=True, rt=1):
+    if do_x:
+        new_cows, cmap = compress_x(cows)
+    else:
+        new_cows, cmap = compress_y(cows)
+
+    new_grid = make_grid(new_cows, scale=grid.props.scale)
+    new_grid.make_axes()
+    c = Circle(radius=0)
+    if do_x:
+        c.next_to(grid.mob, LEFT)
+        new_grid.mob.next_to(c, RIGHT)
+    else:
+        c.next_to(grid.mob, UP)
+        new_grid.mob.next_to(c, DOWN)
+
+    if do_x:
+        h = len(grid.props.arr) - 1
+        axis = grid.mobs.x_axis
+    else:
+        h = len(grid[0].props.arr) - 1
+        axis = grid.mobs.y_axis
+    fades = []
+    A = sorted(cmap.keys())     
+    
+    for x, y in zip(A, A[1:]):
+        if y - x - 1:
+            if do_x:
+                bg = back_grid(grid.cells_in_rect(0, x + 1, h, y - 1))
+            else:
+                bg = back_grid(grid.cells_in_rect(x + 1, 0, y - 1, h))
+            fades.append(bg)
+            fades.append(axis[x + 1:y])
+
+    scene.play(*[FadeOut(x) for x in fades], run_time=rt)
+    
+    transforms = []
+    for i, j in cmap.items():
+        prev = axis[i]
+        new = MathTex(j).move_to(prev)
+        transforms.append(Transform(prev, new))
+
+    scene.play(*transforms, run_time=rt)
+
+    to_moves = []
+    
+    for i, j in cmap.items():
+        if do_x:
+            a = cells_mob(grid.cells_in_rect(0, i, h, i))
+            b = cells_mob(new_grid.cells_in_rect(0, j, h, j))
+            b.add(new_grid.mobs.x_axis[j])
+        else:
+            a = cells_mob(grid.cells_in_rect(i, 0, i, h))
+            b = cells_mob(new_grid.cells_in_rect(j, 0, j, h))
+            b.add(new_grid.mobs.y_axis[j])
+        a.add(axis[i])
+        to_moves.append(Move(a, b))
+
+    scene.play(*to_moves, run_time=rt)
+
+    scene.play(FadeOut(grid.mob), run_time=0)
+    scene.play(FadeIn(new_grid.mob), run_time=0)
+    return new_cows, new_grid
