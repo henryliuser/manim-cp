@@ -97,7 +97,7 @@ class HashSet(ABWComponent):
         if val not in my.set or val is None:
             my.set.add(val)
             my.count += 1
-            a = Integer(my.count, font_size=my.fs)
+            a = Integer(my.czount, font_size=my.fs)
             a.move_to(m.counter)
             a.next_to(m.text, RIGHT, buff=my.buffer)
 
@@ -144,23 +144,44 @@ class CoordinateList(ABWComponent):
         my.coords_mobs.append(mob)
         self.mob.add(mob)
 
-    def AddWithFade(self, x, y):
+    def AddWithFade(self, x, y, rate_func=smooth):
         my = self.props
+        s1 = [','] if my.coords else []
+        s1.extend(['(', str(x), ',', str(y), ')'])
         mobs = []
-        for s in f"({x},{y})":
+        for i, s in enumerate(s1):
             mobs.append(MathTex(s))
-            mobs[-1].next_to(self.mob, RIGHT, buff=.1*my.scale).scale(my.scale)
+            if i == 0:
+                mobs[-1].next_to(self.mobs.cursor, RIGHT, buff=-.1)
+            else:
+                buff = .2*my.scale if (len(s1) == 6 and i ==
+                                       1) else .1*my.scale
+                mobs[-1].next_to(mobs[-2], RIGHT, buff=buff)
             self.mob.add(mobs[-1])
-        self.mob.remove(*mobs)
-        mobs[2].shift(DOWN*.2*my.scale)
+
+        self.mobs.cursor.next_to(mobs[-1], RIGHT)
+
+        mobs[-3].shift(DOWN*.2*my.scale)
+        if len(mobs) == 6:
+            mobs[0].shift(DOWN*.2*my.scale)
+
+        res = [FadeIn(x, rate_func=rate_func) for x in mobs]
+
+        if len(mobs) > 5:
+            self.mob.add(mobs[0])
+            self.props.commas.append(mobs[0])
+            mobs.pop(0)
+
+
         new_mob = VGroup(*mobs)
         self.append(new_mob, (x, y))
-        return FadeIn(new_mob)
+        return res
 
     def AddFromAxes(self, x, y, grid, rate_func=smooth):
         my = self.props
-        pre = ',' if my.coords else ''
-        s1 = f"{pre}({x},{y})"
+        s1 = [','] if my.coords else []
+        s1.extend(['(', str(x), ',', str(y), ')'])
+
         mobs = []
         for i, s in enumerate(s1):
             mobs.append(MathTex(s))
@@ -183,19 +204,23 @@ class CoordinateList(ABWComponent):
         x2, y2 = x1.copy(), y1.copy()
         res = [Transform(x2, mobs[-2], rate_func=rate_func),
                Transform(y2, mobs[-4], rate_func=rate_func)]
+        
+        
 
-        mobs.pop(-4)
-        mobs.pop(-2)
+        cp = mobs.copy()
+        cp.pop(-4)
+        cp.pop(-2)
+        res += [FadeIn(x, rate_func=rate_func) for x in cp]
 
-        res += [FadeIn(x, rate_func=rate_func) for x in mobs]
-
-        if len(mobs) > 3:
+        if len(mobs) == 6:
             self.mob.add(mobs[0])
             self.props.commas.append(mobs[0])
             mobs.pop(0)
 
+        mobs[-4] = y2
+        mobs[-2] = x2
 
-        new_mob = VGroup(*mobs, x2, y2)
+        new_mob = VGroup(*mobs)
         self.append(new_mob, (x, y))
         return res
 
@@ -223,25 +248,45 @@ class CoordinateList(ABWComponent):
 
     # only works on single digits
     def sort(self, y=False):
+
         coords = self.props.coords
-        coords_mobs = self.props.coords_mobs
         orig_coords = coords.copy()
-        new_coords_mobs = [0] * len(coords)
+        coords_mobs = self.props.coords_mobs
     
         if y:
             coords.sort(key=lambda x:x[1])
         else:
             coords.sort()
 
+        temp_cl = CoordinateList()
+        temp_cl.mobs.starter.move_to(self.mobs.starter)
+        temp_cl.reset()
+
+        for x in coords:
+            temp_cl.AddWithFade(*x)
+
+
+        new_coords_mobs = [None]*len(coords)
+        res = []
         for i in range(len(coords)):
-            coords_mobs[i].generate_target()
             j = coords.index(orig_coords[i])
             new_coords_mobs[j] = coords_mobs[i]
-            coords_mobs[i].target.move_to(coords_mobs[j])
+            res.append(Move(coords_mobs[i], temp_cl.props.coords_mobs[j]))
+        
+        for x in self.props.commas:
+            res.append(FadeOut(x))
+            self.mob.remove(x)
+        
+        for x in temp_cl.props.commas:
+            res.append(FadeIn(x))
+            self.mob.add(x)
+        
 
+        self.props.commas = temp_cl.props.commas.copy()
+        
         self.props.coords_mobs = new_coords_mobs
-
-        return [MoveToTarget(x) for x in coords_mobs]
+        self.props.coords = coords
+        return res
     
     def index(self):
         cms = self.props.coords_mobs
@@ -276,7 +321,7 @@ class CoordinateList(ABWComponent):
         if do_y:
             j = 3
         else:
-            j = 4
+            j = 1
         coords = self.props.coords_mobs
         inds = self.props.indices
         res = []

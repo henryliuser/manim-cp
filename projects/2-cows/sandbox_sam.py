@@ -4,7 +4,7 @@ from common import *
 
 class sandbox_sam(Scene):
     def construct(self):
-        cows = [(0, 6), (8, 0), (2, 4), (5, 3)]
+        cows = [(0, 6), (11, 0), (2, 4), (5, 3)]
         grid = make_grid(cows)
         grid.make_axes()
         grid.mob.shift(DOWN + LEFT*2)
