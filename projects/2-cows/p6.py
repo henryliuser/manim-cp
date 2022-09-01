@@ -23,12 +23,12 @@ class p6(Scene):
         # entire grid in memory would take 125,000,000 gigabytes of RAM.	
         cows = gen_random_pasture(20, 30, 60)
         
-        grid = make_grid(cows, scale=.22)
-
+        grid = make_grid(cows)
+        grid.make_axes()
         grid.mob.scale(10)
         self.play(FadeIn(grid.mob))
         self.play(ScaleInPlace(grid.mob, .1))
 
-        # rects = unwrap_rects(grid)[:10]
-        # go_through_rects(rects, grid, self, rt=1/60)
+        rects = unwrap_rects(grid)[:400]
+        go_through_rects(rects, grid, self, rt=1/60, wt=0)
 

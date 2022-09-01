@@ -15,7 +15,6 @@ class sandbox_sam(Scene):
 
         for x, y in cows:
             self.play(*cl.AddFromAxes(y, x, grid))
-
         self.play(*cl.sort())
         self.wait(1)
         for x in cl.index():
@@ -37,7 +36,7 @@ class sandbox_sam(Scene):
         new_cows, new_grid = anim_compress(cows, grid, self)
         self.play(FadeOut(t))
 
-        cl.sort(y=True)
+        self.play(*cl.sort(y=True))
         t, c = cl.anim_map(do_y=True)
         t.shift(RIGHT*4)
         self.play(*c)
