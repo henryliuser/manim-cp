@@ -78,6 +78,12 @@ class Grid(ABWComponent):
     def all_cells(self):
         coords = (0, 0, self.props.nx - 1, self.props.ny - 1)
         return self.cells_in_rect(*coords)
+
+    def rect_mobs(self, x1, y1, x2, y2):
+        return [ cell.mob for _,_,cell in self.cells_in_rect(x1,y1,x2,y2) ]
+
+    def rect_cells(self, x1, y1, x2, y2):
+        return [ cell for _,_,cell in self.cells_in_rect(x1,y1,x2,y2) ]
     
     def highlight_region(self, x1, y1, x2, y2, color=BLACK):
         cells = []

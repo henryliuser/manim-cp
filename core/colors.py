@@ -1,1 +1,3 @@
 LIGHT_ORANGE: str = "#ECAC6F"
+EMERALD: str = "#128965"
+MY_BLUE: str = "#6161F2"
