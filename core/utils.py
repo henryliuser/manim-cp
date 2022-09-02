@@ -135,10 +135,10 @@ class CodeBlock(Code):
 def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
     if    isinstance(group, Scene):   it = group.mobjects
     elif  isinstance(group, Mobject): it = group.submobjects
-    elif  isinstance(group, Proxy):   it = group.__dict__.__iter__()
+    elif  isinstance(group, Proxy):   it = group.__dict__.values()
     else: it = group.__iter__()
-    
-    ok = lambda o : o != None and isinstance(o, VMobject) and (o not in exclude)
+
+    ok = lambda o : o != None and isinstance(o, VMobject) and (o not in exclude)    
     return [o for o in it if ok(o) and pred(o)]
 
 def ScaleAndMove(mob, scale_factor, target=None):
@@ -149,6 +149,7 @@ def ScaleAndMove(mob, scale_factor, target=None):
     return Transform(mob, temp_mob)
 
 def Move(mob, target):
-    mob.generate_target()
-    mob.target.move_to(target)
-    return MoveToTarget(mob)
+    temp_mob = mob.copy()
+    temp_mob.move_to(target)
+    return Transform(mob, temp_mob)
+

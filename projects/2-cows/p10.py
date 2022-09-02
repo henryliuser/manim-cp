@@ -51,7 +51,7 @@ class p10(Scene):
         new_cows, new_grid = anim_compress(cows, grid, self)
         self.play(FadeOut(t))
 
-        cl.sort(y=True)
+        self.play(*cl.sort(y=True))
         t, c = cl.anim_map(do_y=True)
         t.shift(RIGHT*4)
         self.play(*c)
@@ -64,6 +64,8 @@ class p10(Scene):
 
 
         anim_compress(new_cows, new_grid, self, do_x=False)
+        self.wait(3)
+        self.play(FadeOut(VGroup(*all_vmobs_in(self))))
         self.wait(1)
 
 
