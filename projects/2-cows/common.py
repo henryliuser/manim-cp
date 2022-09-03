@@ -361,6 +361,13 @@ def unwrap_rects(grid):
                     res.append((x1, y1, x2, y2))
     return res
 
+def unwrap_rect(r1, c1, r2, c2):
+    res = []
+    for i in range(r1, r2+1):
+        for j in range(c1, c2+1):
+            res += [ (i,j) ]
+    return res
+
 
 def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None,
                      wt=None, **kwargs):

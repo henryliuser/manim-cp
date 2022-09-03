@@ -153,3 +153,14 @@ def Move(mob, target):
     temp_mob.move_to(target)
     return Transform(mob, temp_mob)
 
+FadeInMany  = lambda *o : map(FadeIn, o)
+FadeOutMany = lambda *o : map(FadeOut, o)
+
+def all_pairs(N):
+    res = []
+    for i in range(N-1):
+        for j in range(i+1, N):
+            res += [ (i,j) ]
+    return res
+
+P = lambda scene : scene.wait(0.2)
