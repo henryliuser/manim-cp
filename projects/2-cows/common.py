@@ -85,14 +85,17 @@ class HashSet(ABWComponent):
         m.error.shift(DOWN*.35*my.height).scale(1/10000)
         m.success.move_to(m.error).scale(1/10000)
 
-    def put(self, mob, scene, val=None, rt=1):
+    def put(self, mob, scene, val=None, rt=1, iterate=None):
         my = self.props
         m = self.mobs
 
-        scale_factor = min(1, (3/4 * my.width) / width(mob))
+        scale_factor = min(1, (3/4 * width(self.mob)) / width(mob))
         mob.generate_target()
         mob.target.move_to(m.box).shift(DOWN*.15*my.height)
         scene.play(ScaleAndMove(mob, scale_factor), run_time=rt)
+        if iterate is not None:
+            for x in iterate:
+                scene.play(Indicate(x), run_time=.5)
 
         if val not in my.set or val is None:
             my.set.add(val)
@@ -156,11 +159,11 @@ class CoordinateList(ABWComponent):
                 l = len(my.coords)
                 if l and l % 7 == 0 and i == 1:
                     buff = .2*my.scale if (len(s1) == 6 and i ==
-                                       1) else .1*my.scale
+                                           1) else .1*my.scale
                     mobs[-1].next_to(my.coords_mobs[-7][0], DOWN, buff=buff)
                 else:
                     buff = .2*my.scale if (len(s1) == 6 and i ==
-                                        1) else .1*my.scale
+                                           1) else .1*my.scale
                     mobs[-1].next_to(mobs[-2], RIGHT, buff=buff)
 
             self.mob.add(mobs[-1])
@@ -177,7 +180,6 @@ class CoordinateList(ABWComponent):
             self.mob.add(mobs[0])
             self.props.commas.append(mobs[0])
             mobs.pop(0)
-
 
         new_mob = VGroup(*mobs)
         self.append(new_mob, (x, y))
@@ -197,11 +199,11 @@ class CoordinateList(ABWComponent):
                 l = len(my.coords)
                 if l and l % 7 == 0 and i == 1:
                     buff = .2*my.scale if (len(s1) == 6 and i ==
-                                       1) else .1*my.scale
+                                           1) else .1*my.scale
                     mobs[-1].next_to(my.coords_mobs[-7][0], DOWN, buff=buff)
                 else:
                     buff = .2*my.scale if (len(s1) == 6 and i ==
-                                        1) else .1*my.scale
+                                           1) else .1*my.scale
                     mobs[-1].next_to(mobs[-2], RIGHT, buff=buff)
             self.mob.add(mobs[-1])
 
@@ -216,8 +218,6 @@ class CoordinateList(ABWComponent):
         x2, y2 = x1.copy(), y1.copy()
         res = [Transform(x2, mobs[-2], rate_func=rate_func),
                Transform(y2, mobs[-4], rate_func=rate_func)]
-        
-        
 
         cp = mobs.copy()
         cp.pop(-4)
@@ -264,9 +264,9 @@ class CoordinateList(ABWComponent):
         coords = self.props.coords
         orig_coords = coords.copy()
         coords_mobs = self.props.coords_mobs
-    
+
         if y:
-            coords.sort(key=lambda x:x[1])
+            coords.sort(key=lambda x: x[1])
         else:
             coords.sort()
 
@@ -277,24 +277,21 @@ class CoordinateList(ABWComponent):
         for x in coords:
             temp_cl.AddWithFade(*x)
 
-
         new_coords_mobs = [None]*len(coords)
         res = []
         for i in range(len(coords)):
             j = coords.index(orig_coords[i])
             new_coords_mobs[j] = coords_mobs[i]
             res.append(Move(coords_mobs[i], temp_cl.props.coords_mobs[j]))
-        
 
         for source, dest in zip(self.props.commas, temp_cl.props.commas):
             res.append(Move(source, dest))
-        
-            
+
         self.props.coords_mobs = new_coords_mobs
         self.props.coords = coords
 
         return res
-    
+
     def index(self):
         cms = self.props.coords_mobs
         res = []
@@ -345,6 +342,7 @@ class CoordinateList(ABWComponent):
             t[0][i*2+1].scale(1/1000)
         return res
 
+
 def make_grid(points, spot=BLACK, **kwargs):
     n = max(points)[0] + 1
     m = max(points, key=lambda x: x[1])[1] + 1
@@ -365,8 +363,8 @@ def unwrap_rects(grid):
 
 
 def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None,
-                     wt=-1, **kwargs):
-    if wt == -1:
+                     wt=None, **kwargs):
+    if wt == None:
         wt = rt
     for rect in rects_list:
         ng = grid.sub_grid(*rect, **kwargs)
@@ -380,6 +378,8 @@ def go_through_rects(rects_list, grid, scene, rt=1/6, pg=None,
     return pg
 
 # list of (anim_func, start_time, end_time, args, kwargs)
+
+
 def squish_helper(anim_queue):
     def end_time(x): return x[1] + x[2]
     total = end_time(max(anim_queue, key=end_time))
@@ -395,7 +395,7 @@ def squish_helper(anim_queue):
     return res, total
 
 
-def sweep(rect, grid, cl, rt=1 / 12, add=True):
+def sweep(rect, grid, cl, rt=1 / 12, add=True, color=RED_E):
     t = 0
     anim_queue = []
     r = grid.cells_in_rect(*rect)
@@ -405,7 +405,7 @@ def sweep(rect, grid, cl, rt=1 / 12, add=True):
             if add:
                 anim_queue.append((cl.AddFromAxes, t, rt*4, [x, y, grid], {}))
         else:
-            anim_queue.append((c.anim_highlight, t, rt, [RED_E], {}))
+            anim_queue.append((c.anim_highlight, t, rt, [color], {}))
         t += rt
     return squish_helper(anim_queue)
 
@@ -417,10 +417,11 @@ def right(rect):
 
 
 def n6_alg(grid, scene, cl, hs, rt=1/6, add=True, start=0, end=1000):
-    pg = grid.sub_grid(0, 0, 0, 0)
+    A = unwrap_rects(grid)
+    pg = grid.sub_grid(*A[start])
     scene.play(FadeIn(pg), run_time=rt)
 
-    for rect in unwrap_rects(grid)[start:end]:
+    for rect in A[start:end]:
         # new enclosure
         ng = grid.sub_grid(*rect)
         scene.play(Transform(pg, ng), *grid.remove_highlights(), run_time=rt)
@@ -430,7 +431,6 @@ def n6_alg(grid, scene, cl, hs, rt=1/6, add=True, start=0, end=1000):
         anims, run_time = sweep(rect, grid, cl, rt=max(1/60, rt/2), add=add)
         scene.play(*anims, run_time=run_time)
 
-        
         scene.wait(max(1/60, rt/2))
         # hashset insertion
         nl, res = cl.pop(scene)
@@ -441,35 +441,37 @@ def n6_alg(grid, scene, cl, hs, rt=1/6, add=True, start=0, end=1000):
     scene.play(FadeOut(pg), *grid.remove_highlights(), run_time=rt)
 
 
-def n5_alg(grid, scene, cl, hs, rt=1/6, add=True):
-    pg = grid.sub_grid(0, 0, 0, 0)
+def n5_alg(grid, scene, cl, hs, rt=1/6, add=True, start=0, stop=1000):
+    A = unwrap_rects(grid)
+    pg = grid.sub_grid(*A[start])
     scene.play(FadeIn(pg), run_time=rt)
     w = 0
 
-    for rect in unwrap_rects(grid)[:25]:
+    for rect in A[start:stop]:
         # new enclosure
         ng = grid.sub_grid(*rect)
         nw = width(ng)
         # reset when shrinking
-        if nw <= w:
-            scene.play(*grid.remove_highlights(), *cl.reset())
+        if nw <= w+.01:
+            scene.play(*grid.remove_highlights(), *cl.reset(), run_time=rt)
         w = nw
         scene.play(Transform(pg, ng), run_time=rt)
         scene.wait(rt)
 
         # sweep
         pc = len(cl.props.coords)
-        anims, run_time = sweep(right(rect), grid, cl, rt=rt/2, add=False)
+        anims, run_time = sweep(right(rect), grid, cl,
+                                rt=max(1/60, rt/2), add=add)
         scene.play(*anims, run_time=run_time)
         nc = len(cl.props.coords)
-        scene.wait(rt/2)
+        scene.wait(max(1/60, rt/2))
 
         # hashset insertion
         if nc > pc and add:
             nl = cl.mob.copy()
             hs.put(nl, scene, val=tuple(cl.props.coords), rt=rt*3)
 
-    scene.play(*grid.remove_highlights())
+    scene.play(*grid.remove_highlights(), FadeOut(pg), run_time=rt)
 
 
 def maps(cows):
@@ -489,9 +491,7 @@ def is_minimal(rects, x_map, y_map):
         res.append(y in y_map and x1 <= y_map[y] <= x2)
     return all(res)
 
-# returns corner coordinates for all minimal enclosures
-
-
+# returns rects for all minimal enclosures
 def minimal_enclosures(grid, cows):
     x_map, y_map = maps(cows)
     a = unwrap_rects(grid)
@@ -569,6 +569,7 @@ def gtr_enlarge(rects_list, grid, scene, rt=1/6, pg=None, **kwargs):
         scene.wait(rt)
     return pg
 
+
 def back_grid(cells):
     res = []
     for c in cells:
@@ -576,11 +577,13 @@ def back_grid(cells):
         res.append(c[2].mobs.border)
     return VGroup(*res)
 
+
 def cells_mob(cells):
     res = []
     for c in cells:
         res.append(c[2].mob)
     return VGroup(*res)
+
 
 def compress_x(cows):
     x_map, y_map = maps(cows)
@@ -589,6 +592,7 @@ def compress_x(cows):
     for x, y in cows:
         new_cows.append((x, sy[y]))
     return new_cows, sy
+
 
 def compress_y(cows):
     x_map, y_map = maps(cows)
@@ -622,7 +626,7 @@ def anim_compress(cows, grid, scene, do_x=True, rt=1):
         h = len(grid[0].props.arr) - 1
         axis = grid.mobs.y_axis
     fades = []
-    A = sorted(cmap.keys())     
+    A = sorted(cmap.keys())
     if 0 not in A:
         if do_x:
             bg = back_grid(grid.cells_in_rect(0, 0, h, A[0] - 1))
@@ -638,7 +642,7 @@ def anim_compress(cows, grid, scene, do_x=True, rt=1):
                 bg = back_grid(grid.cells_in_rect(x + 1, 0, y - 1, h))
             fades.append(bg)
             fades.append(axis[x + 1:y])
-    
+
     transforms = []
     for i, j in cmap.items():
         prev = axis[i]
@@ -650,7 +654,7 @@ def anim_compress(cows, grid, scene, do_x=True, rt=1):
     scene.play(*[FadeOut(x) for x in fades], *transforms, run_time=rt)
 
     to_moves = []
-    
+
     for i, j in cmap.items():
         if do_x:
             a = cells_mob(grid.cells_in_rect(0, i, h, i))
@@ -669,6 +673,7 @@ def anim_compress(cows, grid, scene, do_x=True, rt=1):
     scene.play(FadeIn(new_grid.mob), run_time=0)
     return new_cows, new_grid
 
+
 def demod(cows, grid, cl, scene, rt=1):
 
     for x, y in cows:
@@ -679,9 +684,8 @@ def demod(cows, grid, cl, scene, rt=1):
         scene.play(x, run_time=rt/3)
     scene.wait(1)
 
-
     t, c = cl.anim_map()
-    
+
     t.scale(.5)
     t.shift(RIGHT*4)
     scene.play(*c, run_time=rt)
@@ -694,22 +698,21 @@ def demod(cows, grid, cl, scene, rt=1):
 
     new_cows, new_grid = anim_compress(cows, grid, scene, rt=rt)
     scene.play(FadeOut(t), run_time=rt)
-        
+
     scene.play(*cl.sort(y=True))
     t, c = cl.anim_map(do_y=True)
     t.shift(RIGHT*4)
     scene.play(*c, run_time=rt)
     scene.wait(rt)
 
-
     anims = cl.fill_map(t[0], do_y=True)
     for x in anims:
         scene.play(x, run_time=rt/6)
     scene.wait(rt)
 
-
     anim_compress(new_cows, new_grid, scene, do_x=False, rt=rt)
     scene.wait(rt)
+
 
 def position():
     cl = CoordinateList()
@@ -717,3 +720,107 @@ def position():
     hs = HashSet()
     hs.mob.shift(UP*2 + RIGHT*5)
     return cl, hs
+
+def x2y(cows):
+    map = [('x', 'y')]
+    for y, x in sorted(cows, key=lambda x: x[1]):
+        map.append((str(x), str(y)))
+    return Table(map)
+
+def insta_sweep(rect, grid, color=RED):
+    t = 0
+    anims = []
+    r = grid.cells_in_rect(*rect)
+    cow = False
+    for x, y, c in r:
+        if is_cow(c):
+            anims.append(c.anim_highlight(GREEN))
+            cow = True
+        else:
+            anims.append(c.anim_highlight(color))
+    return anims, cow
+
+
+def n4_alg(grid, scene, cl, hs, mp, rt=1/6, add=True, start=0, stop=1000):
+    A = unwrap_rects(grid)
+    pg = grid.sub_grid(*A[start])
+    scene.play(FadeIn(pg), run_time=rt)
+    w = 0
+
+    for rect in A[start:stop]:
+        # new enclosure
+        ng = grid.sub_grid(*rect)
+        nw = width(ng)
+        # reset when shrinking
+        if nw <= w+.01:
+            scene.play(*grid.remove_highlights(), *cl.reset(), run_time=rt)
+        w = nw
+        scene.play(Transform(pg, ng), run_time=rt)
+        scene.wait(rt)
+
+        # sweep
+        pc = len(cl.props.coords)
+        anims, flag = insta_sweep(rect, grid)
+
+        i = rect[3]*2+2
+        tc = GREEN if flag else RED_E
+        for j in [0, 1]:
+            anims.append(Indicate(mp[0][i+j], color=tc))
+            anims.append(FadeToColor(mp[0][i+j], color=tc))
+
+        scene.play(*anims)
+        nc = len(cl.props.coords)
+        scene.wait(max(1/60, rt/2))
+
+        # hashset insertion
+        if nc > pc and add:
+            nl = cl.mob.copy()
+            hs.put(nl, scene, val=tuple(cl.props.coords), rt=rt*3)
+
+    scene.play(*grid.remove_highlights(), FadeOut(pg), run_time=rt)
+    
+def map_helper(rect, grid):
+    cows = []
+    r = grid.cells_in_rect(*rect)
+    for x, y, c in r:
+        if is_cow(c):
+            cows.append((x, y))
+    return tuple(cows)
+
+def minimal_map(grid, cows):
+    rects = minimal_enclosures(grid, cows)
+    res = {}
+    for rect in rects:
+        res[map_helper(rect, grid)] = rect
+    return res
+
+def shrinking_rects(rects, grid, cows):
+    mp = minimal_map(grid, cows)
+    res = []
+    for rect in rects:
+        tp = map_helper(rect, grid)
+        if tp:
+            res.append(rect)
+            res.append(mp[tp])
+    return res
+
+def gtr_minimal(rects_list, grid, scene, cows, col=GREEN_A, rt=1/6, pg=None,
+                     wt=None, always_wait=True, **kwargs):
+    x_map, y_map = maps(cows)
+    if wt == None:
+        wt = rt
+    for rect in rects_list:
+        ng = grid.sub_grid(*rect, **kwargs)
+        if pg is None:
+            pg = ng
+            scene.play(FadeIn(pg), run_time=rt)
+        else:
+            scene.play(Transform(pg, ng), run_time=rt)
+        if wt:
+            if is_minimal(rect, x_map, y_map):
+                pg.set_color(col)
+            if always_wait or is_minimal(rect, x_map, y_map):
+                scene.wait(wt)
+            pg.set_color(kwargs['color'])
+    return pg
+

@@ -136,7 +136,7 @@ def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
     if    isinstance(group, Scene):   it = group.mobjects
     elif  isinstance(group, Mobject): it = group.submobjects
     elif  isinstance(group, Proxy):   it = group.__dict__.values()
-    else: it = group.__iter__()
+    else: it = group.__iter__() 
 
     ok = lambda o : o != None and isinstance(o, VMobject) and (o not in exclude)    
     return [o for o in it if ok(o) and pred(o)]
