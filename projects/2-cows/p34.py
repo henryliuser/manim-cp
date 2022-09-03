@@ -1,4 +1,3 @@
-from dis import show_code
 from core import *
 from common import *
 
@@ -34,9 +33,9 @@ def showcase_subgrid(color, special, grid, scene):
         scene.play(*reset)
     return do_showcase
 
-def make_cover(grid, r1, c1, r2, c2, color):
+def make_cover(grid, r1, c1, r2, c2, color, sf=0.5):
     dx, dy = r2-r1+1, c2-c1+1
-    rect = Rectangle(height=dx, width=dy, fill_color=color, fill_opacity=0.6).scale(0.5)
+    rect = Rectangle(height=dx, width=dy, fill_color=color, fill_opacity=0.6).scale(sf)
     top_left = grid[r1](c1)
     rect.align_to(top_left, LEFT)
     rect.align_to(top_left, UP)
@@ -48,13 +47,13 @@ class p34(MovingCameraScene):
         # Constants
         N = M = 7
         mat = [
-            [3,19,11,14,15,3,12],
-            [16,10,11,6,2,12,4],
-            [6,1,15,5,17,8,2],
-            [17,10,11,5,3,6,7],
-            [19,12,2,3,1,13,16],
-            [5,18,14,9,2,10,4],
-            [19,1,13,15,7,2,16],
+            [3, 19,11,14,15, 3,12],
+            [16,10,11, 6, 2,12, 4],
+            [ 6, 1,15, 5,17, 8, 2],
+            [17,10,11, 5, 3, 6, 7],
+            [19,12, 2, 3, 1,13,16],
+            [ 5,18,14, 9, 2,10, 4],
+            [19, 1,13,15, 7, 2,16],
         ]
         examples = [
             (2,3, 6,5),
@@ -90,30 +89,30 @@ class p34(MovingCameraScene):
         
         # the naive implementation sums up the elements manually for each query,
         # resulting in a time complexity of O(QNM) for Q queries
-        # for rect in examples:
-        #     cur = 0
-        #     funcl = Tex(f"rectSum({  ','.join(map(str, rect))  })")
-        #     arrow = Mono("->")
-        #     resul = Tex("0")
-        #     label = VGroup(funcl, arrow, resul).arrange().to_edge(RIGHT, buff=1.5)
-        #     self.play( Write(label), run_time=1/3 )
-        #     reset = []
-        #     update = lambda x : Transform( resul, Tex(x).next_to(arrow) )
+        for rect in examples:
+            cur = 0
+            funcl = Tex(f"rectSum({  ','.join(map(str, rect))  })")
+            arrow = Mono("->")
+            resul = Tex("0")
+            label = VGroup(funcl, arrow, resul).arrange().to_edge(RIGHT, buff=1.5)
+            self.play( Write(label), run_time=1/3 )
+            reset = []
+            update = lambda x : Transform( resul, Tex(x).next_to(arrow) )
 
-        #     (r1, c1), (r2, c2) = rect[:2], rect[2:]
-        #     top_left = A.grid[r1][c1].anim_highlight(GOLD, rate_func=flash)
-        #     bot_rigt = A.grid[r2][c2].anim_highlight(GOLD, rate_func=flash)
-        #     self.play( top_left, bot_rigt )
-        #     self.wait(0.5)
-        #     for i,j in unwrap_rect(*rect):
-        #         anim = []
-        #         add_highlight( A.grid[i][j], EMERALD, anim, reset )
-        #         cur += mat[i][j]
-        #         anim += [ update(cur) ]
-        #         self.play(*anim, run_time=1/10)
-        #     self.play( FadeOut(label), *reset )
+            (r1, c1), (r2, c2) = rect[:2], rect[2:]
+            top_left = A.grid[r1][c1].anim_highlight(GOLD, rate_func=flash)
+            bot_rigt = A.grid[r2][c2].anim_highlight(GOLD, rate_func=flash)
+            self.play( top_left, bot_rigt )
+            self.wait(0.5)
+            for i,j in unwrap_rect(*rect):
+                anim = []
+                add_highlight( A.grid[i][j], EMERALD, anim, reset )
+                cur += mat[i][j]
+                anim += [ update(cur) ]
+                self.play(*anim, run_time=1/10)
+            self.play( FadeOut(label), *reset )
         
-        # self.wait() 
+        self.wait() 
 
         # Now, imagine we had magical matrix ps
         @cluster
@@ -177,11 +176,10 @@ class p34(MovingCameraScene):
             mob     = VGroup( label, eq, terms ).arrange().scale(3/4).to_corner(UP+RIGHT)
 
             def step():
-                tf = lambda *o : map(FadeIn, o)
-                yield tf(full)
-                yield tf(abov, sign[1])
-                yield tf(left, sign[2])
-                yield tf(smol, sign[3])
+                yield FadeInMany(full)
+                yield FadeInMany(abov, sign[1])
+                yield FadeInMany(left, sign[2])
+                yield FadeInMany(smol, sign[3])
 
         # With this construction in place, let’s explore how we can reformulate
         # the sum of an arbitrary subrectangle (r1, c1, r2, c2) in terms of ps.
@@ -208,13 +206,13 @@ class p34(MovingCameraScene):
 
         # now, we've overcounted a bunch. 
         anims, reset = [], []
-        def add_rect_color(color, *rect):
+        def add_rect_color(grid, color, *rect):
             for i,j in unwrap_rect(*rect):
-                add_highlight(A.grid[i][j], color, anims, reset)
+                add_highlight(grid[i][j], color, anims, reset)
 
-        add_rect_color( DARK_BROWN, 0,0,r1-1,c2 )  # abov
-        add_rect_color( DARK_BROWN, 0,0,r2,c1-1 )  # left
-        add_rect_color(   EMERALD,  r1,c1,r2,c2 )
+        add_rect_color( A.grid, DARK_BROWN, 0,0,r1-1,c2 )  # abov
+        add_rect_color( A.grid, DARK_BROWN, 0,0,r2,c1-1 )  # left
+        add_rect_color( A.grid,   EMERALD,  r1,c1,r2,c2 )
         # Namely, this brown region right here
         self.play( Transform(full, things[0]), *anims )
         self.wait(2)
@@ -225,7 +223,7 @@ class p34(MovingCameraScene):
         self.play( hl, FadeIn(abov), *next(formula) )
         
         anims, reset = [], []
-        add_rect_color( BLACK, 0,0,r1-1,c2 )
+        add_rect_color( A.grid,  BLACK, 0,0,r1-1,c2 )
         self.play( Transform(abov, things[1]), *anims )
         self.wait()
         
@@ -236,8 +234,8 @@ class p34(MovingCameraScene):
         self.wait()
 
         anims = []
-        add_rect_color( BLACK, 0,0,r2,c1-1 )
-        add_rect_color( RED, 0,0,r1-1,c1-1 )
+        add_rect_color( A.grid,  BLACK, 0,0,r2,c1-1 )
+        add_rect_color( A.grid,  RED, 0,0,r1-1,c1-1 )
         self.play( Transform(left, things[2]), *anims )
         self.wait()
 
@@ -247,11 +245,11 @@ class p34(MovingCameraScene):
         hl = color( PS.grid[r1][c1], EMERALD )
         self.play( hl, FadeIn(smol), *next(formula) )
         anims = []
-        add_rect_color( BLACK, 0,0,r1-1,c1-1 )
+        add_rect_color( A.grid,  BLACK, 0,0,r1-1,c1-1 )
         self.play( Transform(smol, things[3]), *anims )
         self.wait()
 
-        everything = VGroup( *all_vmobs_in(self) )
+        self.play( *reset_grid(A.grid), *reset_grid(PS.grid) )
 
 
         covers = VGroup(*thing)
@@ -279,11 +277,62 @@ class p34(MovingCameraScene):
         # okay great, so now let’s go back to how we construct that magic matrix ps.
         # If we’re clever about it, we can use dynamic programming to precompute the entire matrix in O(NM) time. 
         # again here, since it's pretty well-known, i'll just demonstrate the construction.
+        self.play( FadeOut(formula.mob), FadeIn(PS.mob.center().to_edge(RIGHT,buff=1.75) ), FadeIn(PS.label) )
+
         anims = []
-        for c in PS.grid.all_cells():
-            anims += [ c.anim_set_val(0) ]
+        for _,_,c in PS.grid.all_cells():
+            anims += [ c.anim_set_val(0, sf=1/2) ]
         self.play( *anims ) 
 
+        everything = VGroup( *all_vmobs_in(self) )
+        self.play( FadeOut(everything) )
+        
+        @cluster
+        def demo():
+            get = lambda txt, edge : Tex(txt).to_edge(edge, buff=2)
+            grid = Grid( [[0]*6, [0]*6, [0]*6], scale=1 )
+            grid.mob.shift(DOWN)
+            cover = Rectangle(color=BLUE).match_height(grid.mob).match_width(grid.mob).move_to(grid.mob)
+            self.play( Create(cover) )
+            a = Array.Element(value='?', color=BLACK, outline_color=BLUE)
+            a.mob.align_to(cover,RIGHT).align_to(cover,DOWN)
+            self.play( Create(a.mob) )
+
+            @sub_scene
+            def alg():
+                label   = Mono("ps[i][j]")
+                eq      = Tex("$=$")
+                this    = Mono("A[i][j]")
+                abov    = Mono("ps[i-1][j]")
+                left    = Mono("ps[i][j-1]")
+                smol    = Mono("ps[i-1][j-1]")
+                terms   = VGroup(this, abov, left, smol).arrange(DOWN)
+                for x in (abov, left, smol): x.align_to(this, LEFT)
+                signs   = [
+                    Mono("+").next_to(abov, LEFT),
+                    Mono("+").next_to(left, LEFT),
+                    Mono("-").next_to(smol, LEFT),
+                ]
+                VGroup(label, eq, VGroup(*signs, *terms)).arrange().center().to_edge(UP)
+                self.play( Write(label), Write(eq) )
+
+                def step():
+                    yield FadeInMany(this)
+                    yield FadeInMany(abov, signs[0])
+                    yield FadeInMany(left, signs[1])
+                    yield FadeInMany(smol, signs[2])
+
+            rects  = [ make_cover(grid, 2,5,2,5,    GOLD, sf=1) ]
+            rects += [ make_cover(grid, 0,0,1,5, EMERALD, sf=1) ]
+            rects += [ make_cover(grid, 0,0,2,4, EMERALD, sf=1) ]
+            rects += [ make_cover(grid, 0,0,1,4,     RED, sf=1) ]
+            for i in range(4):
+                self.play( *next(alg), Create(rects[i]) )
+                self.wait()
+
+        # TODO: make 2Dpsum generic utility,
+        # TODO: query(r1,c1,r2,c2)
+        # TODO: construct(A)
 
         self.wait(2)
         

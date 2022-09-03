@@ -31,15 +31,15 @@ class Array(ABWComponent):
                     Rectangle(height=my.height, width=my.width)
                 .set_stroke(my.outline_color, my.stroke_width, 1),
             }
-            if isinstance(my.value, int):
+            if isinstance(my.value, int) or isinstance(my.value, str):
                 mobs["tex"] = Tex(my.value).scale(my.scale)
             elif my.value is not None:
                 mobs["val"] = my.value.scale(my.scale)
             super().__init__(my, mobs, kwargs)
 
-        def anim_set_val(self, val):
+        def anim_set_val(self, val, sf=1):
             self.props.value = val
-            tf = Tex(str(val)).move_to(self.mobs.tex)
+            tf = Tex(str(val)).scale(sf).move_to(self.mobs.tex)
             res = Transform(self.mobs.tex, tf)
             return res
 
