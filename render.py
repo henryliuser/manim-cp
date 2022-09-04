@@ -12,7 +12,7 @@ if __name__ == '__main__':
     A.sort(key=k)
     q = sys.argv[2]
     qmap = {'l': '480p15', 'm': '720p30', 'h': '1080p60'}
-    s = "env PYTHONPATH=\"/Users/samuelbrashears/PycharmProjects/manim-cp/\""
+    s = "env PYTHONPATH=\"/Users/samuelbrashears/Documents/PythonProjects/manim-cp/\""
     s += f" manim -q{q} "
     os.system("mkdir output")
     for i, x in enumerate(A):

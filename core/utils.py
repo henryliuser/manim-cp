@@ -164,3 +164,34 @@ def all_pairs(N):
     return res
 
 P = lambda scene : scene.wait(0.2)
+
+TOP_MID   = Dot().to_edge(UP, buff=0)
+TOP_LEFT  = Dot().to_corner(UP+LEFT, buff=0)
+TOP_RIGHT = Dot().to_corner(UP+RIGHT, buff=0)
+MID_MID   = Dot()
+MID_LEFT  = Dot().to_edge(LEFT, buff=0)
+MID_RIGHT = Dot().to_edge(RIGHT, buff=0)
+BOT_MID   = Dot().to_edge(DOWN, buff=0)
+BOT_LEFT  = Dot().to_edge(DOWN+LEFT, buff=0)
+BOT_RIGHT = Dot().to_edge(DOWN+RIGHT, buff=0)
+
+def split():
+    return Rectangle(height=50, width=0.02, fill_opacity=1, fill_color=WHITE)
+
+center    = lambda a,b : VGroup(a,b).get_center()
+
+def Fade(mob, start=None, end=None):
+    def FadeInTo(mob, start, end):
+        length = 1/(end - start)
+        a = 0-length*start
+        b = a + length
+        rf = squish_rate_func(linear, a, b)
+        return FadeIn(mob, rate_func=rf)
+    def FadeOutTo(mob, opacity):
+        new_mob = mob.copy()
+        new_mob.fade(1-opacity)
+        return Transform(mob, new_mob)
+    if start < end:
+        return FadeInTo(mob, start, end)
+    else:
+        return FadeOutTo(mob, end/start)
