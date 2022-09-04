@@ -35,6 +35,13 @@ class test(Scene):
         # self.play( Create(c.mob.to_edge(DOWN)) )
         self.play( Transform(ab, c.mob.to_edge(DOWN)) )
 
+        ab.save_state()
+        self.play( Transform(ab, ab.copy().fade(0.5)) )
+        self.wait()
+        self.play( Restore(ab) )
+        self.wait()
+        
+
 
 # class MovingZoomedSceneAround(ZoomedScene):
 #     def __init__(self, **kwargs):

@@ -1,6 +1,7 @@
 from manim import *
 from core.aliases import *
 from core.cursed import *
+import inspect
 
 class Props:
     def __init__(self, namespace, toRegister):
@@ -163,4 +164,18 @@ def all_pairs(N):
             res += [ (i,j) ]
     return res
 
-P = lambda scene : scene.wait(0.2)
+Hori = lambda length : Rectangle(width=length, height=0.02, fill_opacity=1, fill_color=WHITE)
+Vert = lambda length : Rectangle(width=0.02, height=length, fill_opacity=1, fill_color=WHITE)
+
+# align x to y by dirs
+def align_corner(x, y, *dirs):
+    for d in dirs:
+        x.align_to(y, d)
+    return x 
+
+def inline(func):
+    src = inspect.getsource(func).split('\n')
+    for cut,ch in enumerate( src[1] ):
+        if ch not in " \t":
+            break
+    return '\n'.join(ln[cut:] for ln in src[1:])
