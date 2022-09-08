@@ -29,6 +29,5 @@ class p6(Scene):
         self.play(FadeIn(grid.mob))
         self.play(ScaleInPlace(grid.mob, .1))
 
-        rects = unwrap_rects(grid)[:400]
-        go_through_rects(rects, grid, self, rt=1/60, wt=0)
-
+        self.wait(1)
+        self.play(FadeOut(grid.mob))

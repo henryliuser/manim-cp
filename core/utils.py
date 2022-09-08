@@ -137,7 +137,7 @@ def all_vmobs_in(group, exclude=set(), pred=lambda o : True):
     if    isinstance(group, Scene):   it = group.mobjects
     elif  isinstance(group, Mobject): it = group.submobjects
     elif  isinstance(group, Proxy):   it = group.__dict__.values()
-    else: it = group.__iter__()
+    else: it = group.__iter__() 
 
     ok = lambda o : o != None and isinstance(o, VMobject) and (o not in exclude)    
     return [o for o in it if ok(o) and pred(o)]
@@ -173,9 +173,30 @@ def align_corner(x, y, *dirs):
         x.align_to(y, d)
     return x 
 
-def inline(func):
-    src = inspect.getsource(func).split('\n')
-    for cut,ch in enumerate( src[1] ):
-        if ch not in " \t":
-            break
-    return '\n'.join(ln[cut:] for ln in src[1:])
+
+center    = lambda a,b : VGroup(a,b).get_center()
+TOP_MID   = Dot().to_edge(UP, buff=0)
+TOP_LEFT  = Dot().to_corner(UP+LEFT, buff=0)
+TOP_RIGHT = Dot().to_corner(UP+RIGHT, buff=0)
+MID_MID   = Dot()
+MID_LEFT  = Dot().to_edge(LEFT, buff=0)
+MID_RIGHT = Dot().to_edge(RIGHT, buff=0)
+BOT_MID   = Dot().to_edge(DOWN, buff=0)
+BOT_LEFT  = Dot().to_edge(DOWN+LEFT, buff=0)
+BOT_RIGHT = Dot().to_edge(DOWN+RIGHT, buff=0)
+
+def Fade(mob, start=None, end=None):
+    def FadeInTo(mob, start, end):
+        length = 1/(end - start)
+        a = 0-length*start
+        b = a + length
+        rf = squish_rate_func(linear, a, b)
+        return FadeIn(mob, rate_func=rf)
+    def FadeOutTo(mob, opacity):
+        new_mob = mob.copy()
+        new_mob.fade(1-opacity)
+        return Transform(mob, new_mob)
+    if start < end:
+        return FadeInTo(mob, start, end)
+    else:
+        return FadeOutTo(mob, end/start)

@@ -131,22 +131,25 @@ class p34(MovingCameraScene):
             # TODO: partial fade the ghost cells
             label = Tex("$ps$").add_updater( stay_above(mob) )
             self.play( Create(group), Write(label) )
+            group.save_state()
+            self.play( Transform(group, group.copy().fade(0.5)) )
             
         # where ps[i][j] contains rectSum(0,0,i,j)
-        # reset = []
-        # for i,j in unwrap_rect(1,1,N,M):
-        #     anims = []
-        #     B = PS.grid
-        #     anims += [ color(B[i][j], PINK) ]
-        #     for x,y,cell in B.all_cells():
-        #         col = EMERALD if (0 < x <= i and 0 < y <= j) else BLACK        
-        #         anims += [ color(A.grid[x-1][y-1], col) ]
+        reset = []
+        for i,j in unwrap_rect(1,1,N,M):
+            anims = []
+            B = PS.grid
+            anims += [ color(B[i][j], PINK) ]
+            for x,y,cell in B.all_cells():
+                col = EMERALD if (0 < x <= i and 0 < y <= j) else BLACK        
+                anims += [ color(A.grid[x-1][y-1], col) ]
 
-        #     anims += reset
-        #     self.play( *anims, run_time=1/10 )
-        #     reset = [ color(B[i][j], BLACK) ]
+            anims += reset
+            self.play( *anims, run_time=1/10 )
+            reset = [ color(B[i][j], BLACK) ]
+
         off = 1.5*DOWN
-        self.play( *reset_grid(A.grid), *reset_grid(PS.grid) )
+        self.play( *reset_grid(A.grid) )
         self.play( A.anim.shift(off+LEFT), PS.anim.shift(off+RIGHT) )
         # self.camera.frame.save_state()
         # w = self.camera.frame.width

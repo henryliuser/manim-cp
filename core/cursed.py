@@ -1,6 +1,6 @@
 # https://stackoverflow.com/questions/4214936/how-can-i-get-the-values-of-the-locals-of-a-function-after-it-has-been-executed
 # author: Niklas R
-import sys, types
+import sys, types, inspect
 def call_function_get_frame(func, *args, **kwargs):
   """
   Calls the function *func* with the specified arguments and keyword
@@ -54,6 +54,19 @@ def thing():
   class Bar:
     def hello(self):
       print("Hello, World!")
+
+def unpack(ns):
+    return rf"""
+for k,v in {ns}.items():
+    exec(f"{{k}} = {{v}}")
+"""
+
+def inline(func):
+    src = inspect.getsource(func).split('\n')
+    for cut,ch in enumerate( src[1] ):
+        if ch not in " \t":
+            break
+    return '\n'.join(ln[cut:] for ln in src[1:])
 
 if __name__ == "__main__":
     assert thing.eggs == 'spam'

@@ -14,7 +14,6 @@ class p15(Scene):
         self.play(FadeIn(grid.mob), run_time=.5)
         cows, grid = anim_compress(cows, grid, self, rt=.6)
         cows, grid = anim_compress(cows, grid, self, do_x=False, rt=.6)
-
         new_grid = make_grid(cows)
         new_grid.make_axes()
         new_grid.mob.shift(DOWN)

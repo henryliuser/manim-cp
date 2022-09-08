@@ -1,8 +1,10 @@
 from inspect import getsource
 def inline(func):
-    src = getsource(func).split('\n')
-    return '\n'.join(ln[4:] for ln in src[1:])
-
+    src = inspect.getsource(func).split('\n')
+    for cut,ch in enumerate( src[1] ):
+        if ch not in " \t":
+            break
+    return '\n'.join(ln[cut:] for ln in src[1:])
 
 def foo(x):
     x *= 5
@@ -16,4 +18,14 @@ def my_func():
     print( inline(fn) )
     # print( inline(foo) )
 
-my_func()
+def unpack(ns):
+    return rf"""
+for k,v in {ns}.items():
+    exec(f"{{k}} = {{v}}")
+"""
+
+    
+ns = { "asd":5, "x":"'q8weu'", "a":[123,5] }
+print( unpack('ns') )
+exec( unpack("ns") )
+print( locals() )

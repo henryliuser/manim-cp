@@ -27,18 +27,11 @@ class opa(Scene):
 
 class test(Scene):
     def construct(self):
-        a = Array.Element(value=8)
-        b = Array.Element(value=5)
-        ab = VGroup(a.mob.to_edge(LEFT), b.mob.to_edge(RIGHT))
-        c = Array.Element(value=13)
-        self.play( Create(ab) )
-        # self.play( Create(c.mob.to_edge(DOWN)) )
-        self.play( Transform(ab, c.mob.to_edge(DOWN)) )
-
-        ab.save_state()
-        self.play( Transform(ab, ab.copy().fade(0.5)) )
+        A = Array.Element(value=5)
+        self.add(A.mob)
+        self.play( Transform(A.mob, A.mob.copy().fade(0.5)) )
         self.wait()
-        self.play( Restore(ab) )
+        self.play( A.mob.animate.shift(DOWN) ) 
         self.wait()
         
 
